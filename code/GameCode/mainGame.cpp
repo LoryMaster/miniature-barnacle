@@ -247,8 +247,9 @@ internal void RenderRectangle(GameInfo *Game, MemoryArena *Memory, ScreenInfo *S
 	};
 	Mat4 ModelMatrix = {};
 	//@Learn The view Matrix Works properly now! But learn how opengl positions things? Where's 0,0,0?
-	v4 u = { 0.0f, 0.0f, -7.0f, 1.0f };
-	Mat4 ViewMatrix = LookAt(OpenGL->Camera->Sys, OpenGL->Camera->pos);
+	//Mat4 ViewMatrix1 = LookAt(OpenGL->Camera->Sys, OpenGL->Camera->pos);
+	Mat4 ViewMatrix = LookAt(*OpenGL->Camera);
+
 
 	//Mat4 ProjectionMatrix = PerspectiveProj(0.1f, 100.0f, 0.1f, 0.059f); //The one I found by testing, I think the FOV one is just better though
 
@@ -277,7 +278,7 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	}
 
 
-	static f32 AngleX = 1.0f;
+	static f32 AngleX = 0.0f;
 	static f32 AngleY = 1.0f;
 	static f32 right = 0.0f;
 	static f32 top = 0.0f;

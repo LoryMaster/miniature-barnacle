@@ -231,5 +231,3 @@ Mat4 PerspectiveProjFOV(f32 FOV, f32 aspectRatio, f32 near, f32 far);
 
 Mat4 OrthoProj(f32 near, f32 far, f32 right, f32 top);
 Mat4 OrthoProj(f32 near, f32 far, f32 right, f32 top, f32 left, f32 bottom);
-
-Mat4 LookAt(CoordSys Sys, v4 cameraPos);

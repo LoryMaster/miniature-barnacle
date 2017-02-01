@@ -21,3 +21,5 @@ struct Camera
 };
 
 Camera *createCamera(MemoryArena *Memory, v4 pos, v4 target);
+Mat4 LookAt(CoordSys Sys, v4 cameraPos);
+Mat4 LookAt(Camera Camera);

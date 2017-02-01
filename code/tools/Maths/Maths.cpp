@@ -837,22 +837,3 @@ Mat4 OrthoProj(f32 near, f32 far, f32 right, f32 top, f32 left, f32 bottom)
 
 	return Result;
 }
-
-Mat4 LookAt(CoordSys Sys, v4 cameraPos)
-{
-	v4 x = { Sys.x.x, Sys.x.y, Sys.x.z, 1.0f };
-	v4 y = { Sys.y.x, Sys.y.y, Sys.y.z, 1.0f };
-	v4 z = { Sys.z.x, Sys.z.y, Sys.z.z, 1.0f };
-
-	Mat4 Result = Identity4();
-	Result.row1 = x;
-	Result.row2 = y;
-	Result.row3 = z;
-
-	Mat4 Pos = Identity4();
-	Pos.values[0][3] = -cameraPos.x;
-	Pos.values[1][3] = -cameraPos.y;
-	Pos.values[2][3] = -cameraPos.z;
-
-	return Result * Pos;
-}
