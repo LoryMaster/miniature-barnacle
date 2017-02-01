@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\tools">
+      <UniqueIdentifier>{5416cd97-c160-4a50-afa0-9209cf54909f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tools">
+      <UniqueIdentifier>{833f4f81-0b86-4c99-ac0f-e1885ccd76db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GameCode">
+      <UniqueIdentifier>{ba8284f1-a4a9-41c7-a239-4e3ab9aaa19a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\GameCode">
+      <UniqueIdentifier>{5888958f-f1a0-404a-9c6b-a6a33a0bbc43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Random">
+      <UniqueIdentifier>{576ac01f-02ab-408a-b13f-bec39b980b21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tools\OpenGL">
+      <UniqueIdentifier>{5b8b5661-baf4-45dd-ae95-26a0144f5d03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{52125a55-7ed4-4860-932f-627061d9842b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tools\Maths">
+      <UniqueIdentifier>{9df81580-2e4c-4acd-9979-d349b006fa88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\tools\Maths">
+      <UniqueIdentifier>{950066c4-b01d-4d52-b875-466ec4988b38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tools\OpenGL\Managers">
+      <UniqueIdentifier>{2e538b02-e13c-4b2a-be15-da1f99f3138f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\lsWindows.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tools\lsCRT.h">
+      <Filter>Header Files\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GameCode\mainGame.h">
+      <Filter>Header Files\GameCode</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Random\RandomTable.h">
+      <Filter>Header Files\Random</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tools\Maths\Maths.h">
+      <Filter>Header Files\tools\Maths</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tools\OpenGL\glCore.h">
+      <Filter>Header Files\tools\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tools\OpenGL\glCoreARB.h">
+      <Filter>Header Files\tools\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tools\OpenGL\glext.h">
+      <Filter>Header Files\tools\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tools\OpenGL\glHelperFunctions.h">
+      <Filter>Header Files\tools\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tools\OpenGL\ls_OpenGL.h">
+      <Filter>Header Files\tools\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tools\OpenGL\wglExt.h">
+      <Filter>Header Files\tools\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\win32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tools\OpenGL\Managers\TextureManager.h">
+      <Filter>Header Files\tools\OpenGL\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tools\OpenGL\Managers\ShadersManager.h">
+      <Filter>Header Files\tools\OpenGL\Managers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\tools\OpenGL\Managers\Camera.h">
+      <Filter>Header Files\tools\OpenGL\Managers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\code\win32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\tools\lsCRT.cpp">
+      <Filter>Source Files\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\GameCode\mainGame.cpp">
+      <Filter>Source Files\GameCode</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\tools\ShadersManager.cpp">
+      <Filter>Source Files\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\tools\TextureManager.cpp">
+      <Filter>Source Files\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\tools\Maths\Maths.cpp">
+      <Filter>Source Files\tools\Maths</Filter>
+    </ClCompile>
+    <ClCompile Include="..\code\tools\Camera.cpp">
+      <Filter>Source Files\tools</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\code\Shaders\TriangleFrag.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\code\Shaders\TriangleVert.vs">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\code\Shaders\RectangleFrag.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\code\Shaders\RectangleVert.vs">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
