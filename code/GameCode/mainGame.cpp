@@ -283,6 +283,9 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	static f32 right = 0.0f;
 	static f32 top = 0.0f;
 	static f32 depth = 0.0f;
+	static f32 time = 0.0f;
+
+	time += PI_32 / 128;
 
 	//@TODO Better Input Control?
 	if (Keyboard->Key_W == TRUE)
@@ -329,11 +332,11 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 
 	if (OpenGL->Camera)
 	{
-		v4 deltaPos = { right, top, depth, 1.0f };
+		f32 camX = f32(ls_sine((f64)time)) * 15.0f;
+		f32 camZ = f32(ls_cos((f64)time)) * 15.0f;
+		v4 deltaPos = { camX, 0.0f, camZ, 1.0f };
+		OpenGL->Camera->pos = {0.0f, 0.0f, 0.0f, 1.0f};
 		OpenGL->Camera->pos = Translate(deltaPos) * OpenGL->Camera->pos;
-		right = 0.0f;
-		top = 0.0f;
-		depth = 0.0f;
 	}
 	//RenderTriangle(Game, Screen, OpenGL, Memory);
 	RenderRectangle(Game, Memory, Screen, OpenGL, right, top, AngleX, AngleY);
