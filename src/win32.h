@@ -83,6 +83,16 @@ struct KeyboardManager
 	b32 Key_Ctrl	= FALSE;
 };
 
+struct MouseManager
+{
+	f32 mouseX;
+	f32 mouseY;
+	
+	b32 LeftDown	= FALSE;
+	b32 RigthDown	= FALSE;
+	b32 MiddleDown = FALSE;
+};
+
 enum VAO_Type
 {
 	VAO_NOT_SET,
@@ -114,6 +124,12 @@ struct OpenGLInfo
 	Camera			*Camera;
 
 	b32				isOpenGLInit;
+};
+
+struct InputManager
+{
+	MouseManager		*Mouse;
+	KeyboardManager		*Keyboard;
 };
 
 struct Memory

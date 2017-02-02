@@ -209,57 +209,57 @@ extern "C" {
 // SAL Shit I really don't understand... in the end everything is just turned off.
 //
 
-#define _SAL_nop_impl_ 
-#define _Null_terminated_impl_
-#define _NullNull_terminated_impl_
-#define _Check_return_impl_
-#define _Post_satisfies_impl_(expr)
-#define _Ret1_impl_(p1)
-#define _Post1_impl_(p1)
-#define _Group_impl_(annos)
-#define _GrouP_impl_(annos)
-#define _Post_impl_
-#define _Success_impl_(expr)
-#define _Post_                         _Post_impl_
-#define _Pre_maybenull_
-#define _Post_ptr_invalid_
-
-#define _Group_(annos)                 _Group_impl_(annos _SAL_nop_impl_)
-#define _GrouP_(annos)                 _GrouP_impl_(annos _SAL_nop_impl_)
-
-#define _SA_annotes0(n)
-#define _SA_annotes1(n,pp1)
-#define _SA_annotes2(n,pp1,pp2)
-#define _SA_annotes3(n,pp1,pp2,pp3)
-
-#if defined(BUILD_WINDOWS) && !_USE_ATTRIBUTES_FOR_SAL
-#define _SAL1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1") _GrouP_(annotes _SAL_nop_impl_)
-#define _SAL1_1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.1") _GrouP_(annotes _SAL_nop_impl_)
-#define _SAL1_2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.2") _GrouP_(annotes _SAL_nop_impl_)
-#define _SAL2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
-
-#ifndef _SAL_L_Source_
-// Some annotations aren't officially SAL2 yet.
-#define _SAL_L_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
-#endif
-#else
-#define _SAL1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1") _Group_(annotes _SAL_nop_impl_)
-#define _SAL1_1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.1") _Group_(annotes _SAL_nop_impl_)
-#define _SAL1_2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.2") _Group_(annotes _SAL_nop_impl_)
-#define _SAL2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _Group_(annotes _SAL_nop_impl_)
-#define _SAL_L_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
-#endif
-
-#define _Post_satisfies_(cond)			  _SAL2_Source_(_Post_satisfies_, (cond), _Post_satisfies_impl_(cond))
-#define _Null_terminated_                 _SAL2_Source_(_Null_terminated_, (), _Null_terminated_impl_)
-#define _NullNull_terminated_             _SAL2_Source_(_NullNull_terminated_, (), _NullNull_terminated_impl_)
-#define _Check_return_					  _SAL2_Source_(_Check_return_, (), _Check_return_impl_)
-#define _Post_equals_last_error_		  _SAL2_Source_(_Post_equals_last_error_, (),  _Post_satisfies_(_Curr_ != 0))
-#define _Ret_maybenull_                   _SAL2_Source_(_Ret_maybenull_, (), _Ret1_impl_(__maybenull_impl))
-#define _Post_writable_byte_size_(size)   _SAL2_Source_(_Post_writable_byte_size_, (size), _Post1_impl_(__bytecap_impl(size)))
-#define __drv_freesMem(kind)			  _SAL_L_Source_(__drv_freesMem, (kind), _Post_ _SA_annotes1(SAL_NeedsRelease,__no))
-#define _Frees_ptr_opt_					 _SAL_L_Source_(_Frees_ptr_opt_, (),  _Pre_maybenull_ _Post_ptr_invalid_ __drv_freesMem(Mem))
-#define _Success_(expr)                  _SAL2_Source_(_Success_, (expr), _Success_impl_(expr))
+//#define _SAL_nop_impl_ 
+//#define _Null_terminated_impl_
+//#define _NullNull_terminated_impl_
+//#define _Check_return_impl_
+//#define _Post_satisfies_impl_(expr)
+//#define _Ret1_impl_(p1)
+//#define _Post1_impl_(p1)
+//#define _Group_impl_(annos)
+//#define _GrouP_impl_(annos)
+//#define _Post_impl_
+//#define _Success_impl_(expr)
+//#define _Post_                         _Post_impl_
+//#define _Pre_maybenull_
+//#define _Post_ptr_invalid_
+//
+//#define _Group_(annos)                 _Group_impl_(annos _SAL_nop_impl_)
+//#define _GrouP_(annos)                 _GrouP_impl_(annos _SAL_nop_impl_)
+//
+//#define _SA_annotes0(n)
+//#define _SA_annotes1(n,pp1)
+//#define _SA_annotes2(n,pp1,pp2)
+//#define _SA_annotes3(n,pp1,pp2,pp3)
+//
+//#if defined(BUILD_WINDOWS) && !_USE_ATTRIBUTES_FOR_SAL
+//#define _SAL1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1") _GrouP_(annotes _SAL_nop_impl_)
+//#define _SAL1_1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.1") _GrouP_(annotes _SAL_nop_impl_)
+//#define _SAL1_2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.2") _GrouP_(annotes _SAL_nop_impl_)
+//#define _SAL2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
+//
+//#ifndef _SAL_L_Source_
+//// Some annotations aren't officially SAL2 yet.
+//#define _SAL_L_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
+//#endif
+//#else
+//#define _SAL1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1") _Group_(annotes _SAL_nop_impl_)
+//#define _SAL1_1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.1") _Group_(annotes _SAL_nop_impl_)
+//#define _SAL1_2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.2") _Group_(annotes _SAL_nop_impl_)
+//#define _SAL2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _Group_(annotes _SAL_nop_impl_)
+//#define _SAL_L_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
+//#endif
+//
+//#define _Post_satisfies_(cond)			  _SAL2_Source_(_Post_satisfies_, (cond), _Post_satisfies_impl_(cond))
+//#define _Null_terminated_                 _SAL2_Source_(_Null_terminated_, (), _Null_terminated_impl_)
+//#define _NullNull_terminated_             _SAL2_Source_(_NullNull_terminated_, (), _NullNull_terminated_impl_)
+//#define _Check_return_					  _SAL2_Source_(_Check_return_, (), _Check_return_impl_)
+//#define _Post_equals_last_error_		  _SAL2_Source_(_Post_equals_last_error_, (),  _Post_satisfies_(_Curr_ != 0))
+//#define _Ret_maybenull_                   _SAL2_Source_(_Ret_maybenull_, (), _Ret1_impl_(__maybenull_impl))
+//#define _Post_writable_byte_size_(size)   _SAL2_Source_(_Post_writable_byte_size_, (size), _Post1_impl_(__bytecap_impl(size)))
+//#define __drv_freesMem(kind)			  _SAL_L_Source_(__drv_freesMem, (kind), _Post_ _SA_annotes1(SAL_NeedsRelease,__no))
+//#define _Frees_ptr_opt_					 _SAL_L_Source_(_Frees_ptr_opt_, (),  _Pre_maybenull_ _Post_ptr_invalid_ __drv_freesMem(Mem))
+//#define _Success_(expr)                  _SAL2_Source_(_Success_, (expr), _Success_impl_(expr))
 
 //
 // Aligment
@@ -520,19 +520,19 @@ typedef wchar_t WCHAR;    // wc,   16-bit UNICODE character
 typedef WCHAR *PWCHAR, *LPWCH, *PWCH;
 typedef CONST WCHAR *LPCWCH, *PCWCH;
 
-typedef _Null_terminated_ WCHAR *NWPSTR, *LPWSTR, *PWSTR;
-typedef _Null_terminated_ PWSTR *PZPWSTR;
-typedef _Null_terminated_ CONST PWSTR *PCZPWSTR;
-typedef _Null_terminated_ WCHAR UNALIGNED *LPUWSTR, *PUWSTR;
-typedef _Null_terminated_ CONST WCHAR *LPCWSTR, *PCWSTR;
-typedef _Null_terminated_ PCWSTR *PZPCWSTR;
-typedef _Null_terminated_ CONST PCWSTR *PCZPCWSTR;
-typedef _Null_terminated_ CONST WCHAR UNALIGNED *LPCUWSTR, *PCUWSTR;
+typedef /*_Null_terminated_*/ WCHAR *NWPSTR, *LPWSTR, *PWSTR;
+typedef /*_Null_terminated_*/ PWSTR *PZPWSTR;
+typedef /*_Null_terminated_*/ CONST PWSTR *PCZPWSTR;
+typedef /*_Null_terminated_*/ WCHAR UNALIGNED *LPUWSTR, *PUWSTR;
+typedef /*_Null_terminated_*/ CONST WCHAR *LPCWSTR, *PCWSTR;
+typedef /*_Null_terminated_*/ PCWSTR *PZPCWSTR;
+typedef /*_Null_terminated_*/ CONST PCWSTR *PCZPCWSTR;
+typedef /*_Null_terminated_*/ CONST WCHAR UNALIGNED *LPCUWSTR, *PCUWSTR;
 
-typedef _NullNull_terminated_ WCHAR *PZZWSTR;
-typedef _NullNull_terminated_ CONST WCHAR *PCZZWSTR;
-typedef _NullNull_terminated_ WCHAR UNALIGNED *PUZZWSTR;
-typedef _NullNull_terminated_ CONST WCHAR UNALIGNED *PCUZZWSTR;
+typedef /*_NullNull_terminated_*/ WCHAR *PZZWSTR;
+typedef /*_NullNull_terminated_*/ CONST WCHAR *PCZZWSTR;
+typedef /*_NullNull_terminated_*/ WCHAR UNALIGNED *PUZZWSTR;
+typedef /*_NullNull_terminated_*/ CONST WCHAR UNALIGNED *PCUZZWSTR;
 
 typedef  WCHAR *PNZWCH;
 typedef  CONST WCHAR *PCNZWCH;
@@ -542,15 +542,15 @@ typedef  CONST WCHAR UNALIGNED *PCUNZWCH;
 typedef CHAR *PCHAR, *LPCH, *PCH;
 typedef CONST CHAR *LPCCH, *PCCH;
 
-typedef _Null_terminated_ CHAR *NPSTR, *LPSTR, *PSTR;
-typedef _Null_terminated_ PSTR *PZPSTR;
-typedef _Null_terminated_ CONST PSTR *PCZPSTR;
-typedef _Null_terminated_ CONST CHAR *LPCSTR, *PCSTR;
-typedef _Null_terminated_ PCSTR *PZPCSTR;
-typedef _Null_terminated_ CONST PCSTR *PCZPCSTR;
+typedef /*_Null_terminated_*/ CHAR *NPSTR, *LPSTR, *PSTR;
+typedef /*_Null_terminated_*/ PSTR *PZPSTR;
+typedef /*_Null_terminated_*/ CONST PSTR *PCZPSTR;
+typedef /*_Null_terminated_*/ CONST CHAR *LPCSTR, *PCSTR;
+typedef /*_Null_terminated_*/ PCSTR *PZPCSTR;
+typedef /*_Null_terminated_*/ CONST PCSTR *PCZPCSTR;
 
-typedef _NullNull_terminated_ CHAR *PZZSTR;
-typedef _NullNull_terminated_ CONST CHAR *PCZZSTR;
+typedef /*_NullNull_terminated_*/ CHAR *PZZSTR;
+typedef /*_NullNull_terminated_*/ CONST CHAR *PCZZSTR;
 
 typedef  CHAR *PNZCH;
 typedef  CONST CHAR *PCNZCH;
@@ -965,7 +965,7 @@ WINBASEAPI	DWORD		WINAPI		SleepEx(DWORD dwMilliseconds, BOOL bAlertable);
 WINBASEAPI	VOID		WINAPI		OutputDebugStringA(LPCSTR lpOutputString);
 WINBASEAPI	VOID		WINAPI		DebugBreak(VOID);
 
-WINBASEAPI _Check_return_	_Post_equals_last_error_			DWORD	WINAPI	GetLastError(VOID);
+WINBASEAPI /*_Check_return_	_Post_equals_last_error_*/			DWORD	WINAPI	GetLastError(VOID);
 
 //
 // File I/O
@@ -1036,9 +1036,9 @@ WINBASEAPI	DWORD		WINAPI		GetFileType(HANDLE hFile);
 
 #pragma endregion
 
-WINBASEAPI	_Ret_maybenull_	_Post_writable_byte_size_(dwBytes)	DECLSPEC_ALLOCATOR	LPVOID	WINAPI	HeapAlloc(HANDLE hHeap, DWORD dwFlags, SIZE_T dwBytes);
-WINBASEAPI	_Success_(return != FALSE)	BOOL	WINAPI	HeapFree(HANDLE hHeap, DWORD dwFlags, __drv_freesMem(Mem) _Frees_ptr_opt_ LPVOID lpMem);
-WINBASEAPI _Ret_maybenull_	_Post_writable_byte_size_(dwSize)	LPVOID	WINAPI	VirtualAlloc(LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect);
+WINBASEAPI	/*_Ret_maybenull_	_Post_writable_byte_size_(dwBytes)*/	DECLSPEC_ALLOCATOR	LPVOID	WINAPI	HeapAlloc(HANDLE hHeap, DWORD dwFlags, SIZE_T dwBytes);
+WINBASEAPI	/*_Success_(return != FALSE)*/	BOOL	WINAPI	HeapFree(HANDLE hHeap, DWORD dwFlags, /*__drv_freesMem(Mem) _Frees_ptr_opt_*/ LPVOID lpMem);
+WINBASEAPI /*_Ret_maybenull_	_Post_writable_byte_size_(dwSize)*/	LPVOID	WINAPI	VirtualAlloc(LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect);
 
 WINBASEAPI	HANDLE	WINAPI	GetProcessHeap(VOID);
 
@@ -1348,6 +1348,7 @@ WINUSERAPI	VOID		WINAPI		PostQuitMessage(int nExitCode);
 WINUSERAPI	BOOL		WINAPI		DestroyWindow(HWND hWnd);
 
 			HWND		WINAPI		SetCapture(HWND hWnd);
+			BOOL		WINAPI		GetCursorPos(LPPOINT lpPoint);
 
 
 //

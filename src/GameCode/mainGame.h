@@ -20,7 +20,7 @@ struct GameInfo
 };
 void LoadTexture(GameInfo *Game, MemoryArena *Memory, const char *Path);
 
-extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen, OpenGLInfo *OpenGL, KeyboardManager *Keyboard);
+extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen, OpenGLInfo *OpenGL, InputManager *Input);
 
 //Test Functions
 internal void RenderTriangle(GameInfo *Game, ScreenInfo *Screen, OpenGLInfo *OpenGL, MemoryArena *Memory);

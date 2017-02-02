@@ -269,8 +269,11 @@ internal void RenderRectangle(GameInfo *Game, MemoryArena *Memory, ScreenInfo *S
 	glBindVertexArray(0);
 }
 
-extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen, OpenGLInfo *OpenGL, KeyboardManager *Keyboard)
+extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen, OpenGLInfo *OpenGL, InputManager *Input)
 {
+	KeyboardManager *Keyboard = Input->Keyboard;
+	MouseManager	*Mouse = Input->Mouse;
+
 	if (!OpenGL->isOpenGLInit)
 	{
 		OpenGL->NextAvailableIndex = 0; 

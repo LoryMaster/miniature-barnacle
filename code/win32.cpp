@@ -300,6 +300,51 @@ internal VOID Win32_ProcessKeyboard(KeyboardManager *Keyboard, MSG Msg)
 	}
 }
 
+internal VOID Win32_ProcessMouse(MouseManager *Mouse, MSG Msg)
+{
+	POINT MousePos = {};
+	switch (Msg.message)
+	{
+		case WM_MOUSEMOVE:
+			if (!GetCursorPos(&MousePos))
+			{
+				DWORD Error = GetLastError();
+				LogError("When retrieving mouse position in Win32_ProcessMouse got error: ", Error);
+			}
+			Mouse->mouseX = (f32)MousePos.x;
+			Mouse->mouseY = (f32)MousePos.y;
+			break;
+		case WM_KEYDOWN:
+			switch (Msg.wParam)
+			{
+				case VK_LBUTTON:
+					Mouse->LeftDown = TRUE;
+					break;
+				case VK_RBUTTON:
+					Mouse->RigthDown = TRUE;
+					break;
+				case VK_MBUTTON:
+					Mouse->MiddleDown = TRUE;
+					break;
+			}
+			break;
+		case WM_KEYUP:
+			switch (Msg.wParam)
+			{
+				case VK_LBUTTON:
+					Mouse->LeftDown = FALSE;
+					break;
+				case VK_RBUTTON:
+					Mouse->RigthDown = FALSE;
+					break;
+				case VK_MBUTTON:
+					Mouse->MiddleDown = FALSE;
+					break;
+			}
+			break;
+	}
+}
+
 internal LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	LRESULT Result = 0;
@@ -333,18 +378,22 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	MemoryArena Arena = {};
 	Win32_AllocateMemory(&Arena.PermanentMemory, Megabyte(512), 4);
-	Arena.Alloc				= &Win32_GiveMemory;
-	Arena.Time				= &Win32_Time;
-	Arena.ReadTextFile		= &Win32_ReadTextFile;
-	Arena.ReadEntireFile	= &Win32_ReadEntireFile;
-	Arena.StartingTime		= Win32_Time();
-	Arena.MsPerFrame		= 16.67f;
+	Arena.Alloc = &Win32_GiveMemory;
+	Arena.Time = &Win32_Time;
+	Arena.ReadTextFile = &Win32_ReadTextFile;
+	Arena.ReadEntireFile = &Win32_ReadEntireFile;
+	Arena.StartingTime = Win32_Time();
+	Arena.MsPerFrame = 16.67f;
 
 	OpenGLInfo OpenGL = {};
 
 	GameInfo Game = {};
 
+	InputManager Input = {};
 	KeyboardManager Keyboard = {};
+	MouseManager Mouse = {};
+	Input.Keyboard	= &Keyboard;
+	Input.Mouse		= &Mouse;
 
 	b32 Running = TRUE;
 
@@ -360,6 +409,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		while (PeekMessageA(&Msg, Screen.WindowHandle, 0, 0, PM_REMOVE))
 		{
 			Win32_ProcessKeyboard(&Keyboard, Msg);
+			Win32_ProcessMouse(&Mouse, Msg);
 
 			TranslateMessage(&Msg);
 			DispatchMessageW(&Msg);
@@ -373,7 +423,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		glClearColor(0.0f, 0.75f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		GameLoop(&Game, &Arena, &Screen, &OpenGL, &Keyboard);
+		GameLoop(&Game, &Arena, &Screen, &OpenGL, &Input);
 		if (SwapBuffers(Screen.DeviceContext) == FALSE)
 		{
 			DWORD Error = GetLastError();
