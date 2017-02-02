@@ -192,6 +192,12 @@ internal VOID Win32_SetupScreen(ScreenInfo *Screen, s32 Height, s32 Width, HINST
 		DWORD Error = GetLastError();
 		LogError("When Setting Mouse Capture in Win32_SetupScreen got error: ", Error);
 	}
+
+	if (SetCursorPos(Screen->Width / 2, Screen->Height / 2) == NULL)
+	{
+		DWORD Error = GetLastError();
+		LogError("When Setting Cursor Position in Win32_SetupScreen got error: ", Error);
+	}
 }
 
 internal VOID Win32_SetupOpenGLRenderingContext(ScreenInfo *Screen)
@@ -312,7 +318,7 @@ internal VOID Win32_ProcessMouse(MouseManager *Mouse, MSG Msg)
 				LogError("When retrieving mouse position in Win32_ProcessMouse got error: ", Error);
 			}
 			Mouse->xOffset = (f32)MousePos.x - Mouse->mouseX;
-			Mouse->yOffset = (f32)MousePos.y - Mouse->mouseY;
+			Mouse->yOffset = Mouse->mouseY - (f32)MousePos.y;
 			Mouse->mouseX = (f32)MousePos.x;
 			Mouse->mouseY = (f32)MousePos.y;
 			break;

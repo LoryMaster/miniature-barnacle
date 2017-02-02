@@ -1349,6 +1349,7 @@ WINUSERAPI	BOOL		WINAPI		DestroyWindow(HWND hWnd);
 
 			HWND		WINAPI		SetCapture(HWND hWnd);
 			BOOL		WINAPI		GetCursorPos(LPPOINT lpPoint);
+			BOOL		WINAPI		SetCursorPos(int X, int Y);
 
 
 //

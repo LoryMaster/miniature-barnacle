@@ -314,7 +314,7 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 
 	if (OpenGL->Camera)
 	{
-		f32 sensitivity = 1.0f;
+		f32 sensitivity = 0.005f;
 		Mouse->xOffset *= sensitivity;
 		Mouse->yOffset *= sensitivity;
 
@@ -333,8 +333,6 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 			f32 yawInRad = rad(yaw), pitchInRad = rad(pitch);
 			cameraFront = { (f32)ls_cos(yawInRad) * (f32)ls_cos(pitchInRad), (f32)ls_sine(pitchInRad), (f32)ls_sine(yawInRad) * (f32)ls_cos(pitchInRad) };
 			cameraFront = Normalize(cameraFront);
-			yaw = 0.0f;
-			pitch = 0.0f;
 		}
 		v3 cameraUp = OpenGL->Camera->worldY;
 		if (Keyboard->RightArrow == TRUE)
