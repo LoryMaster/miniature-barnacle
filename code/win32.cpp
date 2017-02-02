@@ -186,6 +186,12 @@ internal VOID Win32_SetupScreen(ScreenInfo *Screen, s32 Height, s32 Width, HINST
 		DWORD Error = GetLastError();
 		LogError("When Retrieving a WindowHandle in Win32_SetupScreen got error: ", Error);
 	}
+
+	if (SetCapture(Screen->WindowHandle) == NULL)
+	{
+		DWORD Error = GetLastError();
+		LogError("When Setting Mouse Capture in Win32_SetupScreen got error: ", Error);
+	}
 }
 
 internal VOID Win32_SetupOpenGLRenderingContext(ScreenInfo *Screen)
