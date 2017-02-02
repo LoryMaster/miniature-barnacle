@@ -309,8 +309,8 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 
 	if (OpenGL->Camera)
 	{
-		v3 cameraFront = { 0.0f, 0.0f, -1.0f };
-		v3 cameraUp = { 0.0f, 1.0f, 0.0f };
+		v3 cameraFront = OpenGL->Camera->worldZ;
+		v3 cameraUp = OpenGL->Camera->worldY;
 		if (Keyboard->RightArrow == TRUE)
 		{
 			OpenGL->Camera->pos = OpenGL->Camera->pos + V4((Normalize(cameraFront ^ cameraUp) * OpenGL->Camera->speed));
