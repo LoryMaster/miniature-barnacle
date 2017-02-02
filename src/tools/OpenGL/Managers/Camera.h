@@ -7,6 +7,7 @@ struct Camera
 	v4 pos;
 	v4 target;
 	
+	f32 speed;
 	union
 	{
 		struct

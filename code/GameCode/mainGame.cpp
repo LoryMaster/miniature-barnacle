@@ -26,6 +26,15 @@ void LoadTexture(GameInfo *Game, MemoryArena *Memory, const char *Path)
 	}
 }
 
+internal void InitCamera(OpenGLInfo *OpenGL, MemoryArena *Memory)
+{
+	v4 pos = { 0.0f, 0.0f, 15.0f, 1.0f };
+	v4 target = { 0.0f, 0.0f, 0.0f, 1.0f };
+	Camera *Camera = createCamera(Memory, pos, target);
+
+	OpenGL->Camera = Camera;
+}
+
 internal void RenderTriangle(GameInfo *Game, ScreenInfo *Screen, OpenGLInfo *OpenGL, MemoryArena *Memory)
 {
 	//TEMPORARY, MAKE FINDING FUNCTION MAYBE?
@@ -220,15 +229,6 @@ internal void RenderRectangle(GameInfo *Game, MemoryArena *Memory, ScreenInfo *S
 		OpenGL->NextAvailableIndex++;
 	}
 
-	if (!OpenGL->Camera)
-	{
-		v4 pos = { 0.0f, 0.0f, 15.0f, 1.0f };
-		v4 target = { 0.0f, 0.0f, 0.0f, 1.0f };
-		Camera *Camera = createCamera(Memory, pos, target);
-
-		OpenGL->Camera = Camera;
-	}
-
 	glUseProgram(*Program);
 
 	glActiveTexture(GL_TEXTURE0);
@@ -277,6 +277,8 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		OpenGL->isOpenGLInit = TRUE;
 	}
 
+	if (!OpenGL->Camera) { InitCamera(OpenGL, Memory); }
+
 
 	static f32 AngleX = 0.0f;
 	static f32 AngleY = 1.0f;
@@ -305,39 +307,54 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		AngleY -= 0.1f;
 	}
 
-	if (Keyboard->RightArrow == TRUE)
-	{
-		right += 0.1f;
-	}
-	if (Keyboard->UpArrow == TRUE)
-	{
-		top += 0.1f;
-	}
-	if (Keyboard->LeftArrow == TRUE)
-	{
-		right -= 0.1f;
-	}
-	if (Keyboard->DownArrow == TRUE)
-	{
-		top -= 0.1f;
-	}
-	if (Keyboard->Key_Shift == TRUE)
-	{
-		depth += 0.1f;
-	}
-	if (Keyboard->Key_Ctrl == TRUE)
-	{
-		depth -= 0.1f;
-	}
-
 	if (OpenGL->Camera)
 	{
-		f32 camX = f32(ls_sine((f64)time)) * 15.0f;
-		f32 camZ = f32(ls_cos((f64)time)) * 15.0f;
-		v4 deltaPos = { camX, 0.0f, camZ, 1.0f };
-		OpenGL->Camera->pos = {0.0f, 0.0f, 0.0f, 1.0f};
-		OpenGL->Camera->pos = Translate(deltaPos) * OpenGL->Camera->pos;
+		v3 cameraFront = { 0.0f, 0.0f, -1.0f };
+		v3 cameraUp = { 0.0f, 1.0f, 0.0f };
+		if (Keyboard->RightArrow == TRUE)
+		{
+			OpenGL->Camera->pos = OpenGL->Camera->pos + V4((Normalize(cameraFront ^ cameraUp) * OpenGL->Camera->speed));
+			//right += 0.1f;
+		}
+		if (Keyboard->UpArrow == TRUE)
+		{
+			OpenGL->Camera->pos = OpenGL->Camera->pos + V4(cameraUp * OpenGL->Camera->speed);
+			//top += 0.1f;
+		}
+		if (Keyboard->LeftArrow == TRUE)
+		{
+			OpenGL->Camera->pos = OpenGL->Camera->pos - V4((Normalize(cameraFront ^ cameraUp) * OpenGL->Camera->speed));
+			//right -= 0.1f;
+		}
+		if (Keyboard->DownArrow == TRUE)
+		{
+			OpenGL->Camera->pos = OpenGL->Camera->pos - V4(cameraUp * OpenGL->Camera->speed);
+			//top -= 0.1f;
+		}
+		if (Keyboard->Key_Shift == TRUE)
+		{
+			OpenGL->Camera->pos = OpenGL->Camera->pos - V4(cameraFront * OpenGL->Camera->speed);
+			//depth += 0.1f;
+		}
+		if (Keyboard->Key_Ctrl == TRUE)
+		{
+			OpenGL->Camera->pos = OpenGL->Camera->pos + V4(cameraFront * OpenGL->Camera->speed);
+			//depth -= 0.1f;
+		}
+
+		// Crazy rotating camera around a target (0.0, 0.0, 0.0)
+		/*if (OpenGL->Camera)
+		{
+			f32 camX = f32(ls_sine((f64)time)) * 15.0f;
+			f32 camZ = f32(ls_cos((f64)time)) * 15.0f;
+			v4 deltaPos = { camX, 0.0f, camZ, 1.0f };
+			OpenGL->Camera->pos = {0.0f, 0.0f, 0.0f, 1.0f};
+			OpenGL->Camera->pos = Translate(deltaPos) * OpenGL->Camera->pos;
+		}*/
+
+		OpenGL->Camera->target = OpenGL->Camera->pos + V4(cameraFront);
 	}
+
 	//RenderTriangle(Game, Screen, OpenGL, Memory);
 	RenderRectangle(Game, Memory, Screen, OpenGL, right, top, AngleX, AngleY);
 

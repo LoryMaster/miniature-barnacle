@@ -332,6 +332,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	Arena.ReadTextFile		= &Win32_ReadTextFile;
 	Arena.ReadEntireFile	= &Win32_ReadEntireFile;
 	Arena.StartingTime		= Win32_Time();
+	Arena.MsPerFrame		= 16.67f;
 
 	OpenGLInfo OpenGL = {};
 

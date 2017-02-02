@@ -78,6 +78,10 @@ v2i vec2(s32 x, s32 y);
 v3i vec3(s32 x, s32 y, s32 z);
 v4i vec4(s32 x, s32 y, s32 z, s32 w);
 
+v2 V3(v3 v);
+v3 V3(v4 v);
+v4 V4(v3 v);
+
 v2	operator+(v2 v, v2 u);
 v3	operator+(v3 v, v3 u);
 v4	operator+(v4 v, v4 u);
@@ -109,6 +113,10 @@ v4	Normalize(v4 v);
 v2 Normalize(v2i v);
 v3 Normalize(v3i v);
 v4 Normalize(v4i v);
+
+v2	operator*(v2 v, f32 value);
+v3	operator*(v3 v, f32 value);
+v4	operator*(v4 v, f32 value);
 
 f32	operator*(v2 v, v2 u);
 f32	operator*(v3 v, v3 u);
