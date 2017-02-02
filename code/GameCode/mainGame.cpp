@@ -289,6 +289,8 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	static f32 top = 0.0f;
 	static f32 depth = 0.0f;
 	static f32 time = 0.0f;
+	static f32 yaw = 0.0f;
+	static f32 pitch = 0.0f;
 
 	time += PI_32 / 128;
 
@@ -312,7 +314,28 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 
 	if (OpenGL->Camera)
 	{
-		v3 cameraFront = OpenGL->Camera->worldZ;
+		f32 sensitivity = 1.0f;
+		Mouse->xOffset *= sensitivity;
+		Mouse->yOffset *= sensitivity;
+
+		yaw += Mouse->xOffset;
+		pitch += Mouse->yOffset;
+
+		if (pitch > 89.0f) { pitch = 89.0f; }
+		if (pitch < -89.0f) { pitch = -89.0f; }
+	}
+
+	if (OpenGL->Camera)
+	{
+		v3 cameraFront = {0.0f, 0.0f, -1.0f};
+		if (yaw || pitch)
+		{
+			f32 yawInRad = rad(yaw), pitchInRad = rad(pitch);
+			cameraFront = { (f32)ls_cos(yawInRad) * (f32)ls_cos(pitchInRad), (f32)ls_sine(pitchInRad), (f32)ls_sine(yawInRad) * (f32)ls_cos(pitchInRad) };
+			cameraFront = Normalize(cameraFront);
+			yaw = 0.0f;
+			pitch = 0.0f;
+		}
 		v3 cameraUp = OpenGL->Camera->worldY;
 		if (Keyboard->RightArrow == TRUE)
 		{

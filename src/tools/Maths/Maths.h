@@ -78,7 +78,7 @@ v2i vec2(s32 x, s32 y);
 v3i vec3(s32 x, s32 y, s32 z);
 v4i vec4(s32 x, s32 y, s32 z, s32 w);
 
-v2 V3(v3 v);
+v2 V2(v3 v);
 v3 V3(v4 v);
 v4 V4(v3 v);
 

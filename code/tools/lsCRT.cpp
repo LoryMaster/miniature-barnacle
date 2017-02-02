@@ -10,6 +10,11 @@ s32 ls_abs(s32 x)
 	return (x < 0) ? x*(-1) : x;
 }
 
+f32 rad(f32 x)
+{
+	return ((x*PI_32) / 180.0f);
+}
+
 f64 ls_sine(f64 x)
 {
 	b32 isNegative = (x > 0) ? FALSE : TRUE;
