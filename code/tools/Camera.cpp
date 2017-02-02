@@ -17,6 +17,12 @@ Camera *createCamera(MemoryArena *Memory, v4 pos, v4 target)
 	Result->xDir = WorldY ^ Result->zDir;
 	Result->yDir = Result->zDir ^ Result->xDir;
 
+	Result->worldX = {1.0f, 0.0f, 0.0f};
+	Result->worldY = {0.0f, 1.0f, 0.0f};
+	Result->worldZ = {0.0f, 0.0f, -1.0f};
+
+	Result->speed = 0.05f;
+
 	return Result;
 }
 

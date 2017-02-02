@@ -140,6 +140,7 @@ struct MemoryArena
 	WIN32_READENTIREFILE	ReadEntireFile;
 
 	ULONGLONG				StartingTime;
+	f32						MsPerFrame;
 
 	Memory					PermanentMemory;
 

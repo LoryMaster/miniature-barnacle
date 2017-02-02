@@ -40,6 +40,24 @@ v4i vec4(s32 x, s32 y, s32 z, s32 w)
 	return Result;
 }
 
+v2 V2(v3 v)
+{
+	v2 Result = { v.x, v.y };
+	return Result;
+}
+
+v3 V3(v4 v)
+{
+	v3 Result = { v.x, v.y, v.z };
+	return Result;
+}
+
+v4 V4(v3 v)
+{
+	v4 Result = { v.x, v.y, v.z, 1.0f };
+	return Result;
+}
+
 ///////////////////////////////////////////
 // VECTOR OPERATORS
 ///////////////////////////////////////////
@@ -197,6 +215,24 @@ v3i	operator-(v3i v, v3i u)
 v4i	operator-(v4i v, v4i u)
 {
 	v4i Result = { v.x - u.x, v.y - u.y, v.z - u.z, v.w - u.w };
+	return Result;
+}
+
+v2	operator*(v2 v, f32 value)
+{
+	v2 Result = { v.x * value, v.y * value };
+	return Result;
+}
+
+v3	operator*(v3 v, f32 value)
+{
+	v3 Result = { v.x * value, v.y * value, v.z * value };
+	return Result;
+}
+
+v4	operator*(v4 v, f32 value)
+{
+	v4 Result = { v.x * value, v.y * value, v.z * value, v.w * value };
 	return Result;
 }
 

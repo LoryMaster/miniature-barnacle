@@ -35,7 +35,8 @@
 #Visual Studio Stuff
 *.vcxproj
 *.vcxproj.filters
-*.vcxproj.users
+*.vcxproj.user
+*.suo
 *.log
 *.idb
 *.pdb

@@ -1347,6 +1347,9 @@ WINUSERAPI	BOOL		WINAPI		PostMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM
 WINUSERAPI	VOID		WINAPI		PostQuitMessage(int nExitCode);
 WINUSERAPI	BOOL		WINAPI		DestroyWindow(HWND hWnd);
 
+			HWND		WINAPI		SetCapture(HWND hWnd);
+
+
 //
 //PeekMessage() Options
 //

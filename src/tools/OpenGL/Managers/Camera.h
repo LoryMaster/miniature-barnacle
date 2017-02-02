@@ -7,6 +7,7 @@ struct Camera
 	v4 pos;
 	v4 target;
 	
+	f32 speed;
 	union
 	{
 		struct
@@ -15,9 +16,19 @@ struct Camera
 			v3 yDir;
 			v3 zDir;
 		};
-		CoordSys Sys;		
+		CoordSys CameraSys;		
 	};
 	
+	union
+	{
+		struct
+		{
+			v3 worldX;
+			v3 worldY;
+			v3 worldZ;
+		};
+		CoordSys WorldSys;
+	};
 };
 
 Camera *createCamera(MemoryArena *Memory, v4 pos, v4 target);
