@@ -108,7 +108,7 @@ f64 ls_atan(f64 x)
 		{
 			mappedX += PI_32;
 		}
-		mappedX += PI_32;
+		//mappedX += PI_32;
 	}
 	else
 	{

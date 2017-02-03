@@ -179,7 +179,7 @@ internal VOID Win32_SetupScreen(ScreenInfo *Screen, s32 Height, s32 Width, HINST
 		LogError("When Registering WindowClass in Win32_SetupScreen got error: ", Error);
 	}
 
-	//WindowProc function needs to be fully operational before calling CreateWindow(Ex)(A/W) Because it calls it and uses it's return to create the window.
+	//@NOTE: WindowProc function needs to be fully operational before calling CreateWindow(Ex)(A/W) Because it calls it and uses it's return to create the window.
 	//It can be set to return DefWindowProc(A/W) to return all default values and not have to handle them
 	if ((Screen->WindowHandle = CreateWindowExA(0L, Screen->WindowClass.lpszClassName, "Win 32 Platform", WS_OVERLAPPED | WS_VISIBLE , CW_USEDEFAULT, CW_USEDEFAULT, Screen->Width, Screen->Height, 0, 0, Instance, 0)) == nullptr)
 	{
@@ -187,6 +187,8 @@ internal VOID Win32_SetupScreen(ScreenInfo *Screen, s32 Height, s32 Width, HINST
 		LogError("When Retrieving a WindowHandle in Win32_SetupScreen got error: ", Error);
 	}
 
+	//@TODO Make this error path more @ROBUST. SetCapture actually returns an Handle to the previous Window owning mouse capture
+	//If that window wasn't me, it will just post errors without meaning, even if stuff worked.
 	if (SetCapture(Screen->WindowHandle) == NULL)
 	{
 		DWORD Error = GetLastError();
@@ -359,7 +361,26 @@ internal LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM wParam, L
 	switch (Message)
 	{
 		case WM_ACTIVATEAPP:
-			OutputDebugStringA("Activate App\n"); //@TODO: Test more throughly
+			if (wParam == TRUE)
+			{
+				OutputDebugStringA("Activate App\n"); 
+				//@TODO Make this error path more @ROBUST. SetCapture actually returns an Handle to the previous Window owning mouse capture
+				//If that window wasn't me, it will just post errors without meaning, even if stuff worked.
+				if (SetCapture(Window) == NULL)
+				{
+					DWORD Error = GetLastError();
+					LogError("When Setting Mouse Capture in WindowProc got error: ", Error);
+				}
+			}
+			else
+			{
+				OutputDebugStringA("Deactivate App\n");
+				if (ReleaseCapture() == NULL)
+				{
+					DWORD Error = GetLastError();
+					LogError("When Setting Mouse Capture in WindowProc got error: ", Error);
+				}
+			}
 			break;
 
 		default:
@@ -432,7 +453,13 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		GameLoop(&Game, &Arena, &Screen, &OpenGL, &Input);
-		SetCursorPos(Screen.Width / 2, Screen.Height / 2);
+
+		HWND ActiveWindow = GetActiveWindow();
+		if (ActiveWindow == Screen.WindowHandle)
+		{
+			SetCursorPos(Screen.Width / 2, Screen.Height / 2);
+		}
+
 		if (SwapBuffers(Screen.DeviceContext) == FALSE)
 		{
 			DWORD Error = GetLastError();

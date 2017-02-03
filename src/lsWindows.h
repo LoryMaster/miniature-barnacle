@@ -1346,10 +1346,12 @@ WINUSERAPI	LRESULT		WINAPI		DispatchMessageW(CONST MSG *lpMsg);
 WINUSERAPI	BOOL		WINAPI		PostMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 WINUSERAPI	VOID		WINAPI		PostQuitMessage(int nExitCode);
 WINUSERAPI	BOOL		WINAPI		DestroyWindow(HWND hWnd);
+WINUSERAPI	HWND		WINAPI		GetActiveWindow(void);
 
-			HWND		WINAPI		SetCapture(HWND hWnd);
-			BOOL		WINAPI		GetCursorPos(LPPOINT lpPoint);
-			BOOL		WINAPI		SetCursorPos(int X, int Y);
+WINUSERAPI	HWND		WINAPI		SetCapture(HWND hWnd);
+WINUSERAPI	BOOL		WINAPI		ReleaseCapture(void);
+WINUSERAPI	BOOL		WINAPI		GetCursorPos(LPPOINT lpPoint);
+WINUSERAPI	BOOL		WINAPI		SetCursorPos(int X, int Y);
 
 
 //
