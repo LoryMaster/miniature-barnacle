@@ -314,15 +314,15 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 
 	if (OpenGL->Camera)
 	{
-		f32 sensitivity = 0.5f;
+		f32 sensitivity = 1.0f;
 		f32 xOff = (f32)Mouse->xOffset * sensitivity;
 		f32 yOff = (f32)Mouse->yOffset * sensitivity;
 
 		f32 yawArg = (xOff / (Screen->Height / 2));
 		f32 pitchArg = (yOff / (Screen->Width / 2));
 
-		yaw = (f32)ls_atan((f64)yawArg);
-		pitch = (f32)ls_atan((f64)pitchArg);
+		yaw += (f32)ls_atan((f64)yawArg);
+		pitch += (f32)ls_atan((f64)pitchArg);
 
 		f32 MaxPitch = (89.0f*PI_32) / 180.0f;
 
