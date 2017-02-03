@@ -314,26 +314,28 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 
 	if (OpenGL->Camera)
 	{
-		f32 sensitivity = 0.005f;
-		Mouse->xOffset *= sensitivity;
-		Mouse->yOffset *= sensitivity;
+		f32 sensitivity = 0.5f;
+		f32 xOff = (f32)Mouse->xOffset * sensitivity;
+		f32 yOff = (f32)Mouse->yOffset * sensitivity;
 
-		yaw += Mouse->xOffset;
-		pitch += Mouse->yOffset;
+		f32 yawArg = (xOff / (Screen->Height / 2));
+		f32 pitchArg = (yOff / (Screen->Width / 2));
 
-		if (pitch > 89.0f) { pitch = 89.0f; }
-		if (pitch < -89.0f) { pitch = -89.0f; }
+		yaw = (f32)ls_atan((f64)yawArg);
+		pitch = (f32)ls_atan((f64)pitchArg);
+
+		f32 MaxPitch = (89.0f*PI_32) / 180.0f;
+
+		if (pitch > MaxPitch) { pitch = MaxPitch; }
+		if (pitch < -MaxPitch) { pitch = -MaxPitch; }
 	}
 
 	if (OpenGL->Camera)
 	{
 		v3 cameraFront = {0.0f, 0.0f, -1.0f};
-		if (yaw || pitch)
-		{
-			f32 yawInRad = rad(yaw), pitchInRad = rad(pitch);
-			cameraFront = { (f32)ls_cos(yawInRad) * (f32)ls_cos(pitchInRad), (f32)ls_sine(pitchInRad), (f32)ls_sine(yawInRad) * (f32)ls_cos(pitchInRad) };
-			cameraFront = Normalize(cameraFront);
-		}
+		cameraFront = { (f32)ls_cos(yaw) * (f32)ls_cos(pitch), (f32)ls_sine(pitch), (f32)ls_sine(yaw) * (f32)ls_cos(pitch) };
+		cameraFront = Normalize(cameraFront);
+
 		v3 cameraUp = OpenGL->Camera->worldY;
 		if (Keyboard->RightArrow == TRUE)
 		{

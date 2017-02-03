@@ -97,6 +97,44 @@ f64 ls_tan(f64 x)
 	return (ls_sine(x) / ls_cos(x));
 }
 
+f64 ls_atan(f64 x)
+{
+	b32 isNegative = (x > 0) ? FALSE : TRUE;
+	f64 mappedX = x;
+
+	if (isNegative)
+	{
+		while (mappedX < -(PI_32/2))
+		{
+			mappedX += PI_32;
+		}
+		mappedX += PI_32;
+	}
+	else
+	{
+		while (mappedX > PI_32/2)
+		{
+			mappedX -= PI_32;
+		}
+	}
+
+	f64 z = (mappedX - 1.0658e-16f) / 0.91373f;
+
+	f64 cube = z*z*z;
+	f64 fifth = cube*z*z;
+	f64 seventh = fifth*z*z;
+	f64 ninth = seventh*z*z;
+
+	f64 square = z*z;
+	f64 fourth = square*square;
+	f64 sixth = fourth*square;
+	f64 eigth = fourth*fourth;
+	f64 tenth = eigth*square;
+
+	return -(4.9113e-17*tenth) + (0.0021578*ninth) + (3.3292e-16*eigth) - (0.020435*seventh) - (8.1985e-16*sixth)
+		+ (0.084557*fifth) + (7.7802e-16*fourth) - (0.23796*cube) - (2.0129e-16*square) + (0.91182*z) + (1.209e-16);
+}
+
 f32 ls_sqrt(f32 x)
 {
 	__m128 Result = _mm_set_ps(x, x, x, x);
