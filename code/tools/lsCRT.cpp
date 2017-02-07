@@ -325,37 +325,33 @@ char * ls_ftoa(f32 x)
 	Exponent |= LastExpBit << 0;
 	Exponent -= 127;
 
-	//Good debugging thing. It seems the exponent is actually signed
-	//At = (u8 *)(&floatMemory) + 2;
-	//At = (u8 *)(&floatMemory) + 1;
-	//At = (u8 *)(&floatMemory);
+	u32 Mantissa = 0;
 
-	//fjl(1)
-	//{
-	//	fil(8)
-	//	{
-	//		if (((*expAt8 >> i) & 1u) == 0) { OutputDebugStringA("0"); }
-	//		else { OutputDebugStringA("1"); }
-	//	}
-	//	OutputDebugStringA(" ");
-	//	//expAt += 1;
-	//}
-	//OutputDebugStringA("\n");
+	//Byte 3 of the mantissa minus bit 7
+	u8 *ManAt = (u8 *)(&Mantissa) + 3;
+	At = (u8 *)(&floatMemory) + 2;
+	*ManAt = (*At << 1);
+	
+	// Adding bit 7 to byte 3
+	At = (u8 *)(&floatMemory) + 1;
+	*ManAt |= (*At >> 7) << 0;
 
-	//fjl(4)
-	//{
-	//	fil(8)
-	//	{
-	//		if (((*At >> i) & 1u) == 0) { OutputDebugStringA("0"); }
-	//		else { OutputDebugStringA("1"); }
-	//	}
-	//	OutputDebugStringA(" ");
-	//	At += 1;
-	//}
-	//OutputDebugStringA("\n");
+	//Byte 2 of the mantissa minus bit 15
+	ManAt = (u8 *)(&Mantissa) + 2;
+	At = (u8 *)(&floatMemory) + 1;
+	*ManAt = (*At << 1);
 
-	//At = (u8 *)(&floatMemory);
-	//floatMemory = floatMemory << 1;
+	// Adding bit 15 to byte 2
+	At = (u8 *)(&floatMemory);
+	*ManAt |= (*At >> 7) << 0;
+
+	//Byte 1 of the mantissa 
+	ManAt = (u8 *)(&Mantissa) + 1;
+	At = (u8 *)(&floatMemory);
+	*ManAt = (*At << 1);
+
+	// AAAND THE MANTISSA IS BE DONE!!!!
+
 
 	//fjl(4)
 	//{
