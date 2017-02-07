@@ -309,18 +309,26 @@ char * ls_itoa(s32 x)
 //@TODO Actually do this?? @TODO @TODO @TODO @TODO THIS!
 char * ls_ftoa(f32 x)
 {
+	// Probably can even remove this memcpy. Gonna keep it for now!
 	u32 floatMemory = 0;
 	ls_memcpy((void *)(&x), (void *)&floatMemory, 4);
-
-	char *Result = 0;
-	u8 *At = (u8 *)(&floatMemory);
-	u8 Sign = (*(At + 3) >> 7) & 1u;
 	
-	u16 *expAt = (u16 *)(&floatMemory) + 1;
-	*expAt = *expAt << 1;
+	char *Result = 0;
+	u8 *At = (u8 *)(&floatMemory) + 3;
+	u8 Sign = (*At >> 7) & 1u;
 
-	u8 *expAt8 = (u8 *)(expAt) + 1;
-	u8 Exponent = *expAt8 - 127;
+	At = (u8 *)(&floatMemory) + 2;
+	u8 LastExpBit = (*At >> 7) & 1u;
+
+	At = (u8 *)(&floatMemory) + 3;
+	s8 Exponent = (*At << 1);
+	Exponent |= LastExpBit << 0;
+	Exponent -= 127;
+
+	//Good debugging thing. It seems the exponent is actually signed
+	//At = (u8 *)(&floatMemory) + 2;
+	//At = (u8 *)(&floatMemory) + 1;
+	//At = (u8 *)(&floatMemory);
 
 	//fjl(1)
 	//{
