@@ -2,6 +2,9 @@
 
 #include "lsWindows.h"
 
+#define fil(value) for(int i = 0; i < value; i++)
+#define fjl(value) for(int j = 0; j < value; j++)
+
 ////////////////////////////////////////////////////
 //	MATH FUNCTIONS
 ////////////////////////////////////////////////////
@@ -24,6 +27,7 @@ f32 ls_sqrt(f32 x);
 
 s32 ls_len(char * string);
 char * ls_itoa(s32 x);
+char * ls_ftoa(f32 x);
 char * ls_concat(char *string1, char *string2, b32 hasToFree);
 s32 ls_strcmp(char *string1, char *string2);
 

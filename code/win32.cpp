@@ -266,6 +266,10 @@ internal VOID Win32_ProcessKeyboard(KeyboardManager *Keyboard, MSG Msg)
 			case 'D':
 				Keyboard->Key_D = TRUE;
 				break;
+			
+			case 'P':
+				Keyboard->Key_P = TRUE;
+				break;
 			}
 			break;
 		case WM_KEYUP:
@@ -301,6 +305,10 @@ internal VOID Win32_ProcessKeyboard(KeyboardManager *Keyboard, MSG Msg)
 				break;
 			case 'D':
 				Keyboard->Key_D = FALSE;
+				break;
+
+			case 'P':
+				Keyboard->Key_P = FALSE;
 				break;
 			}
 		default:
@@ -393,6 +401,9 @@ internal LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM wParam, L
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	//Win32_SetFnPointers();
+
+	ls_ftoa(1.0f);
+	ls_ftoa(-0.5f);
 
 	LARGE_INTEGER QueryFreq = {};
 	if (!QueryPerformanceFrequency(&QueryFreq))

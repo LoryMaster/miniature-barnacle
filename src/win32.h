@@ -14,8 +14,6 @@
 #define Mb				Megabyte
 #define Gb				Gigabyte
 
-#define fil(value) for(int i = 0; i < value; i++)
-
 //Really don't have time to fukin fight with includes...
 #pragma region GL TYPES
 typedef unsigned int GLenum;
@@ -78,6 +76,8 @@ struct KeyboardManager
 	b32 Key_A		= FALSE;
 	b32 Key_S		= FALSE;
 	b32 Key_D		= FALSE;
+
+	b32 Key_P		= FALSE;
 
 	b32 Key_Shift	= FALSE;
 	b32 Key_Ctrl	= FALSE;

@@ -282,6 +282,7 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 
 	if (!OpenGL->Camera) { InitCamera(OpenGL, Memory); }
 
+	static v3 cameraFront = { 0.0f, 0.0f, -1.0f };
 
 	static f32 AngleX = 0.0f;
 	static f32 AngleY = 1.0f;
@@ -328,13 +329,18 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 
 		if (pitch > MaxPitch) { pitch = MaxPitch; }
 		if (pitch < -MaxPitch) { pitch = -MaxPitch; }
-	}
 
-	if (OpenGL->Camera)
-	{
-		v3 cameraFront = {0.0f, 0.0f, -1.0f};
-		cameraFront = { (f32)ls_cos(yaw) * (f32)ls_cos(pitch), (f32)ls_sine(pitch), (f32)ls_sine(yaw) * (f32)ls_cos(pitch) };
-		cameraFront = Normalize(cameraFront);
+		if (Keyboard->Key_P == TRUE)
+		{
+			int BreakHere = 1;
+		}
+
+		if ((yawArg && pitchArg) != 0)
+		{
+			//@TODO Re-Math this v3 right here. I've just copy pasta'd it and I don't trust that guy on the web
+			cameraFront = { (f32)ls_cos(yaw) * (f32)ls_cos(pitch), (f32)ls_sine(pitch), (f32)ls_sine(yaw) * (f32)ls_cos(pitch) };
+			cameraFront = Normalize(cameraFront);
+		}
 
 		v3 cameraUp = OpenGL->Camera->worldY;
 		if (Keyboard->RightArrow == TRUE)

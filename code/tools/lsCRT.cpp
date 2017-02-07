@@ -306,6 +306,64 @@ char * ls_itoa(s32 x)
 	return nullptr;
 }
 
+//@TODO Actually do this?? @TODO @TODO @TODO @TODO THIS!
+char * ls_ftoa(f32 x)
+{
+	u32 floatMemory = 0;
+	ls_memcpy((void *)(&x), (void *)&floatMemory, 4);
+
+	char *Result = 0;
+	u8 *At = (u8 *)(&floatMemory);
+	u8 Sign = (*(At + 3) >> 7) & 1u;
+	
+	u16 *expAt = (u16 *)(&floatMemory) + 1;
+	*expAt = *expAt << 1;
+
+	u8 *expAt8 = (u8 *)(expAt) + 1;
+	u8 Exponent = *expAt8 - 127;
+
+	//fjl(1)
+	//{
+	//	fil(8)
+	//	{
+	//		if (((*expAt8 >> i) & 1u) == 0) { OutputDebugStringA("0"); }
+	//		else { OutputDebugStringA("1"); }
+	//	}
+	//	OutputDebugStringA(" ");
+	//	//expAt += 1;
+	//}
+	//OutputDebugStringA("\n");
+
+	//fjl(4)
+	//{
+	//	fil(8)
+	//	{
+	//		if (((*At >> i) & 1u) == 0) { OutputDebugStringA("0"); }
+	//		else { OutputDebugStringA("1"); }
+	//	}
+	//	OutputDebugStringA(" ");
+	//	At += 1;
+	//}
+	//OutputDebugStringA("\n");
+
+	//At = (u8 *)(&floatMemory);
+	//floatMemory = floatMemory << 1;
+
+	//fjl(4)
+	//{
+	//	fil(8)
+	//	{
+	//		if (((*At >> i) & 1u) == 0) { OutputDebugStringA("0"); }
+	//		else { OutputDebugStringA("1"); }
+	//	}
+	//	OutputDebugStringA(" ");
+	//	At += 1;
+	//}
+	//OutputDebugStringA("\n");
+
+	return 0;
+}
+
 char * ls_concat(char *string1, char *string2, b32 hasToFree)
 {
 	HANDLE HeapHandle = GetProcessHeap();
