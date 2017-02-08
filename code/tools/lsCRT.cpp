@@ -166,141 +166,76 @@ char * ls_itoa(s32 x)
 
 	char *Result = 0;
 	bool isNegative = false;
+	u32 size = 0;
 	int units = 0, tens = 0, hundreds = 0, thousands = 0, tensOfThousands = 0;
 	if (x < 0)
 	{
 		isNegative = true;
 		x = ls_abs(x);
 	}
-	if ((x >= 10000) && (x < 100000))
+
+	if ((x >= 10000) && (x < 100000)) { size = 5; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
+	else if ((x >= 1000) && (x < 10000)) { size = 4; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
+	else if ((x >= 100) && (x < 1000)) { size = 3; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
+	else if ((x >= 10) && (x < 100)) { size = 2; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
+	else if (x < 10) { size = 1; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
+
+	switch (size)
 	{
-		tensOfThousands = x;
-		while ((tensOfThousands % 10000) != 0)
-		{
-			tensOfThousands--;
-		}
-		thousands = x - tensOfThousands;
-		while ((thousands % 1000) != 0)
-		{
-			thousands--;
-		}
-		hundreds = x - tensOfThousands - thousands;
-		while ((hundreds % 100) != 0)
-		{
-			hundreds--;
-		}
-		tens = x - tensOfThousands - thousands - hundreds;
+		case 5:
+			tensOfThousands = (int)(x / 10000); x -= tensOfThousands * 10000;
+			thousands = (int)(x / 1000); x -= thousands * 1000;
+			hundreds = (int)(x / 100); x -= hundreds * 100;
+			tens = (int)(x / 10); x -= tens * 10;
+			units = x;
 
-		while ((tens % 10) != 0)
-		{
-			tens--;
-		}
-		units = x - tensOfThousands - thousands - hundreds - tens;
-		tensOfThousands /= 10000;
-		thousands /= 1000;
-		hundreds /= 100;
-		tens /= 10;
+			Result[0] = tensOfThousands + 48;
+			Result[1] = thousands + 48;
+			Result[2] = hundreds + 48;
+			Result[3] = tens + 48;
+			Result[4] = units + 48;
 
+			return Result;
 
+		case 4:
+			thousands = (int)(x / 1000); x -= thousands * 1000;
+			hundreds = (int)(x / 100); x -= hundreds * 100;
+			tens = (int)(x / 10); x -= tens * 10;
+			units = x;
 
-		Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 5);
-		Assert(Result != NULL);
-		Result[0] = tensOfThousands + 48;
-		Result[1] = thousands + 48;
-		Result[2] = hundreds + 48;
-		Result[3] = tens + 48;
-		Result[4] = units + 48;
+			Result[0] = thousands + 48;
+			Result[1] = hundreds + 48;
+			Result[2] = tens + 48;
+			Result[3] = units + 48;
 
-		return Result;
-	}
-	if ((x >= 1000) && (x < 10000))
-	{
-		thousands = x;
-		while ((thousands % 1000) != 0)
-		{
-			thousands--;
-		}
-		hundreds = x - thousands;
-		while ((hundreds % 100) != 0)
-		{
-			hundreds--;
-		}
-		tens = x - thousands - hundreds;
+			return Result;
 
-		while ((tens % 10) != 0)
-		{
-			tens--;
-		}
-		units = x - thousands - hundreds - tens;
-		thousands /= 1000;
-		hundreds /= 100;
-		tens /= 10;
+		case 3:
+			hundreds = (int)(x / 100); x -= hundreds * 100;
+			tens = (int)(x / 10); x -= tens * 10;
+			units = x;
 
+			Result[0] = hundreds + 48;
+			Result[1] = tens + 48;
+			Result[2] = units + 48;
 
+			return Result;
 
-		Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 4);
-		Assert(Result != NULL);
-		Result[0] = thousands + 48;
-		Result[1] = hundreds + 48;
-		Result[2] = tens + 48;
-		Result[3] = units + 48;
+		case 2:
+			tens = (int)(x / 10); x -= tens * 10;
+			units = x;
 
-		return Result;
-	}
-	if ((x >= 100) && (x < 1000))
-	{
-		hundreds = x;
-		while ((hundreds % 100) != 0)
-		{
-			hundreds--;
-		}
-		tens = x - hundreds;
+			Result[0] = tens + 48;
+			Result[1] = units + 48;
 
-		while ((tens % 10) != 0)
-		{
-			tens--;
-		}
-		units = x - hundreds - tens;
-		hundreds /= 100;
-		tens /= 10;
-		
-		
+			return Result;
 
-		Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 3);
-		Assert(Result != NULL);
-		Result[0] = hundreds + 48;
-		Result[1] = tens + 48;
-		Result[2] = units + 48;
+		case 1:
+			units = x;
 
-		return Result;
-	}
+			Result[0] = units + 48;
 
-	if ((x >= 10) && (x < 100))
-	{
-		tens = x;
-		while ((tens % 10) != 0)
-		{
-			tens--;
-		}
-		units = x - tens;
-		tens /= 10;
-		
-
-		Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 2);
-		Assert(Result != NULL);
-		Result[0] = tens + 48;
-		Result[1] = units + 48;
-
-		return Result;
-	}
-	else if(x < 10)
-	{
-		units = x;
-		Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 1);
-		Assert(Result != NULL);
-		Result[0] = units + 48;
-
-		return Result;
+			return Result;
 	}
 
 	return nullptr;
