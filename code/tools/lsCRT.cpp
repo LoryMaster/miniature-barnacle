@@ -167,66 +167,110 @@ char * ls_itoa(s32 x)
 	char *Result = 0;
 	bool isNegative = false;
 	u32 size = 0;
-	int units = 0, tens = 0, hundreds = 0, thousands = 0, tensOfThousands = 0;
+	int units = 0, e1 = 0, e2 = 0, e3 = 0, e4 = 0, e5 = 0, e6 = 0;
 	if (x < 0)
 	{
 		isNegative = true;
 		x = ls_abs(x);
 	}
 
-	if ((x >= 10000) && (x < 100000)) { size = 5; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
-	else if ((x >= 1000) && (x < 10000)) { size = 4; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
-	else if ((x >= 100) && (x < 1000)) { size = 3; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
-	else if ((x >= 10) && (x < 100)) { size = 2; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
-	else if (x < 10) { size = 1; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
+	if ((x >= 1000000) && (x < 10000000)) { size = 8;  Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
+	else if ((x >= 100000) && (x < 1000000)) { size = 7;  Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
+	else if ((x >= 10000) && (x < 100000)) { size = 6; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
+	else if ((x >= 1000) && (x < 10000)) { size = 5; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
+	else if ((x >= 100) && (x < 1000)) { size = 4; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
+	else if ((x >= 10) && (x < 100)) { size = 3; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
+	else if (x < 10) { size = 2; Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size); }
 
-	switch (size)
+	switch (size-1)
 	{
-		case 5:
-			tensOfThousands = (int)(x / 10000); x -= tensOfThousands * 10000;
-			thousands = (int)(x / 1000); x -= thousands * 1000;
-			hundreds = (int)(x / 100); x -= hundreds * 100;
-			tens = (int)(x / 10); x -= tens * 10;
+		case 7:
+			e6 = (int)(x / 1000000); x -= e6 * 1000000;
+			e5 = (int)(x / 100000); x -= e5 * 100000;
+			e4 = (int)(x / 10000); x -= e4 * 10000;
+			e3 = (int)(x / 1000); x -= e3 * 1000;
+			e2 = (int)(x / 100); x -= e2 * 100;
+			e1 = (int)(x / 10); x -= e1 * 10;
 			units = x;
 
-			Result[0] = tensOfThousands + 48;
-			Result[1] = thousands + 48;
-			Result[2] = hundreds + 48;
-			Result[3] = tens + 48;
+			Result[0] = e6 + 48;
+			Result[1] = e5 + 48;
+			Result[2] = e4 + 48;
+			Result[3] = e3 + 48;
+			Result[4] = e2 + 48;
+			Result[5] = e1 + 48;
+			Result[6] = units + 48;
+			Result[7] = 0;
+
+			return Result;
+
+		case 6:
+			e5 = (int)(x / 100000); x -= e5 * 100000;
+			e4 = (int)(x / 10000); x -= e4 * 10000;
+			e3 = (int)(x / 1000); x -= e3 * 1000;
+			e2 = (int)(x / 100); x -= e2 * 100;
+			e1 = (int)(x / 10); x -= e1 * 10;
+			units = x;
+
+			Result[0] = e5 + 48;
+			Result[1] = e4 + 48;
+			Result[2] = e3 + 48;
+			Result[3] = e2 + 48;
+			Result[4] = e1 + 48;
+			Result[5] = units + 48;
+			Result[6] = 0;
+
+			return Result;
+
+		case 5:
+			e4 = (int)(x / 10000); x -= e4 * 10000;
+			e3 = (int)(x / 1000); x -= e3 * 1000;
+			e2 = (int)(x / 100); x -= e2 * 100;
+			e1 = (int)(x / 10); x -= e1 * 10;
+			units = x;
+
+			Result[0] = e4 + 48;
+			Result[1] = e3 + 48;
+			Result[2] = e2 + 48;
+			Result[3] = e1 + 48;
 			Result[4] = units + 48;
+			Result[5] = 0;
 
 			return Result;
 
 		case 4:
-			thousands = (int)(x / 1000); x -= thousands * 1000;
-			hundreds = (int)(x / 100); x -= hundreds * 100;
-			tens = (int)(x / 10); x -= tens * 10;
+			e3 = (int)(x / 1000); x -= e3 * 1000;
+			e2 = (int)(x / 100); x -= e2 * 100;
+			e1 = (int)(x / 10); x -= e1 * 10;
 			units = x;
 
-			Result[0] = thousands + 48;
-			Result[1] = hundreds + 48;
-			Result[2] = tens + 48;
+			Result[0] = e3 + 48;
+			Result[1] = e2 + 48;
+			Result[2] = e1 + 48;
 			Result[3] = units + 48;
+			Result[4] = 0;
 
 			return Result;
 
 		case 3:
-			hundreds = (int)(x / 100); x -= hundreds * 100;
-			tens = (int)(x / 10); x -= tens * 10;
+			e2 = (int)(x / 100); x -= e2 * 100;
+			e1 = (int)(x / 10); x -= e1 * 10;
 			units = x;
 
-			Result[0] = hundreds + 48;
-			Result[1] = tens + 48;
+			Result[0] = e2 + 48;
+			Result[1] = e1 + 48;
 			Result[2] = units + 48;
+			Result[3] = 0;
 
 			return Result;
 
 		case 2:
-			tens = (int)(x / 10); x -= tens * 10;
+			e1 = (int)(x / 10); x -= e1 * 10;
 			units = x;
 
-			Result[0] = tens + 48;
+			Result[0] = e1 + 48;
 			Result[1] = units + 48;
+			Result[2] = 0;
 
 			return Result;
 
@@ -234,6 +278,7 @@ char * ls_itoa(s32 x)
 			units = x;
 
 			Result[0] = units + 48;
+			Result[1] = 0;
 
 			return Result;
 	}
@@ -241,139 +286,159 @@ char * ls_itoa(s32 x)
 	return nullptr;
 }
 
-//@TODO Actually do this?? @TODO @TODO @TODO @TODO THIS!
+//@NOTE: Figured this is waaay too overcomplicated for a proper float conversion to string. let's just integer divide a couple of times.
+// But it was fun to understand and solve these problems. Anyway, I solved it, so I'm happy about that :D
+//char * ls_ftoa(f32 x)
+//{
+//	HANDLE HeapHandle = GetProcessHeap();
+//
+//	// Probably can even remove this memcpy. Gonna keep it for now!
+//	u32 floatMemory = 0;
+//	ls_memcpy((void *)(&x), (void *)&floatMemory, 4);
+//	
+//	char *Result = 0;
+//	u8 *At = (u8 *)(&floatMemory) + 3;
+//	u8 Sign = (*At >> 7) & 1u;
+//
+//	At = (u8 *)(&floatMemory) + 2;
+//	u8 LastExpBit = (*At >> 7) & 1u;
+//
+//	At = (u8 *)(&floatMemory) + 3;
+//	s8 Exponent = (*At << 1);
+//	Exponent |= LastExpBit << 0;
+//	Exponent -= 127;
+//
+//	u32 Mantissa = 0;
+//
+//	//Byte 3 of the mantissa minus bit 7
+//	u8 *ManAt = (u8 *)(&Mantissa) + 3;
+//	At = (u8 *)(&floatMemory) + 2;
+//	*ManAt = (*At << 1);
+//	
+//	// Adding bit 7 to byte 3
+//	At = (u8 *)(&floatMemory) + 1;
+//	*ManAt |= (*At >> 7) << 0;
+//
+//	//Byte 2 of the mantissa minus bit 15
+//	ManAt = (u8 *)(&Mantissa) + 2;
+//	At = (u8 *)(&floatMemory) + 1;
+//	*ManAt = (*At << 1);
+//
+//	// Adding bit 15 to byte 2
+//	At = (u8 *)(&floatMemory);
+//	*ManAt |= (*At >> 7) << 0;
+//
+//	//Byte 1 of the mantissa 
+//	ManAt = (u8 *)(&Mantissa) + 1;
+//	At = (u8 *)(&floatMemory);
+//	*ManAt = (*At << 1);
+//
+//	//
+//	// Return Value in case we have negative or positive zero
+//	//
+//	if ((Exponent == -127) && (Mantissa == 0))
+//	{
+//		if(Sign == 0) 
+//		{ 
+//			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 3); 
+//			Result[0] = 48;
+//			Result[1] = '.';
+//			Result[2] = 48;
+//			return Result;
+//		}
+//		else
+//		{
+//			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 4);
+//			Result[0] = '-';
+//			Result[1] = 48;
+//			Result[2] = '.';
+//			Result[3] = 48;
+//			return Result;
+//		}
+//	}
+//
+//	//
+//	// @NOTE: I'm not gonna return values for denormalized numbers (don't really see the point for my uses)
+//	//
+//
+//	//
+//	// Return Value in case we have an infinite
+//	//
+//	if ((Exponent == 128) && (Mantissa == 0))
+//	{
+//		if (Sign == 0)
+//		{
+//			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 5);
+//			Result[0] = '+';
+//			Result[1] = 'i';
+//			Result[2] = 'n';
+//			Result[3] = 'f';
+//			Result[4] = '.';
+//			return Result;
+//		}
+//		else
+//		{
+//			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 5);
+//			Result[0] = '-';
+//			Result[1] = 'i';
+//			Result[2] = 'n';
+//			Result[3] = 'f';
+//			Result[4] = '.';
+//			return Result;
+//		}
+//	}
+//
+//	//
+//	// Return Value in case we have a NaN
+//	//
+//
+//	if ((Exponent == 128) && (Mantissa != 0))
+//	{
+//		Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 3);
+//		Result[0] = 'N';
+//		Result[1] = 'a';
+//		Result[2] = 'N';
+//		return Result;
+//	}
+//
+//	//
+//	// Return Value for classical, boring Normalized Numbers
+//	//
+//
+//	return 0;
+//}
+
 char * ls_ftoa(f32 x)
 {
 	HANDLE HeapHandle = GetProcessHeap();
-
-	// Probably can even remove this memcpy. Gonna keep it for now!
-	u32 floatMemory = 0;
-	ls_memcpy((void *)(&x), (void *)&floatMemory, 4);
-	
 	char *Result = 0;
-	u8 *At = (u8 *)(&floatMemory) + 3;
-	u8 Sign = (*At >> 7) & 1u;
 
-	At = (u8 *)(&floatMemory) + 2;
-	u8 LastExpBit = (*At >> 7) & 1u;
+	char *IntegerPart = ls_itoa((int)x);
+	int fractValue = int(((int)x * 1000000) - x * 1000000);
+	char *FractPart = ls_itoa(fractValue);
 
-	At = (u8 *)(&floatMemory) + 3;
-	s8 Exponent = (*At << 1);
-	Exponent |= LastExpBit << 0;
-	Exponent -= 127;
+	if (x < 0)
+	{
+		char *Negative = ls_concat("-", IntegerPart, 0);
+		char *Part1 = ls_concat(Negative, ".", 0);
+		Result = ls_concat(Part1, FractPart, 0);
 
-	u32 Mantissa = 0;
+		HeapFree(HeapHandle, 0, Negative);
+		HeapFree(HeapHandle, 0, Part1);
+	}
+	else
+	{
+		char *Part1 = ls_concat(IntegerPart, ".", 0);
+		Result = ls_concat(Part1, FractPart, 0);
+		
+		HeapFree(HeapHandle, 0, Part1);
+	}
 
-	//Byte 3 of the mantissa minus bit 7
-	u8 *ManAt = (u8 *)(&Mantissa) + 3;
-	At = (u8 *)(&floatMemory) + 2;
-	*ManAt = (*At << 1);
+	HeapFree(HeapHandle, 0, IntegerPart);
+	HeapFree(HeapHandle, 0, FractPart);
 	
-	// Adding bit 7 to byte 3
-	At = (u8 *)(&floatMemory) + 1;
-	*ManAt |= (*At >> 7) << 0;
 
-	//Byte 2 of the mantissa minus bit 15
-	ManAt = (u8 *)(&Mantissa) + 2;
-	At = (u8 *)(&floatMemory) + 1;
-	*ManAt = (*At << 1);
-
-	// Adding bit 15 to byte 2
-	At = (u8 *)(&floatMemory);
-	*ManAt |= (*At >> 7) << 0;
-
-	//Byte 1 of the mantissa 
-	ManAt = (u8 *)(&Mantissa) + 1;
-	At = (u8 *)(&floatMemory);
-	*ManAt = (*At << 1);
-
-	//
-	// Return Value in case we have negative or positive zero
-	//
-	if ((Exponent == -127) && (Mantissa == 0))
-	{
-		if(Sign == 0) 
-		{ 
-			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 3); 
-			Result[0] = 48;
-			Result[1] = '.';
-			Result[2] = 48;
-			return Result;
-		}
-		else
-		{
-			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 4);
-			Result[0] = '-';
-			Result[1] = 48;
-			Result[2] = '.';
-			Result[3] = 48;
-			return Result;
-		}
-	}
-
-	//
-	// @NOTE: I'm not gonna return values for denormalized numbers (don't really see the point for my uses)
-	//
-
-	//
-	// Return Value in case we have an infinite
-	//
-	if ((Exponent == 128) && (Mantissa == 0))
-	{
-		if (Sign == 0)
-		{
-			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 5);
-			Result[0] = '+';
-			Result[1] = 'i';
-			Result[2] = 'n';
-			Result[3] = 'f';
-			Result[4] = '.';
-			return Result;
-		}
-		else
-		{
-			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 5);
-			Result[0] = '-';
-			Result[1] = 'i';
-			Result[2] = 'n';
-			Result[3] = 'f';
-			Result[4] = '.';
-			return Result;
-		}
-	}
-
-	//
-	// Return Value in case we have a NaN
-	//
-
-	if ((Exponent == 128) && (Mantissa != 0))
-	{
-		Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 3);
-		Result[0] = 'N';
-		Result[1] = 'a';
-		Result[2] = 'N';
-		return Result;
-	}
-
-	//
-	// Return Value for classical, boring Normalized Numbers
-	//
-
-
-
-	//fjl(4)
-	//{
-	//	fil(8)
-	//	{
-	//		if (((*At >> i) & 1u) == 0) { OutputDebugStringA("0"); }
-	//		else { OutputDebugStringA("1"); }
-	//	}
-	//	OutputDebugStringA(" ");
-	//	At += 1;
-	//}
-	//OutputDebugStringA("\n");
-
-	return 0;
+	return Result;
 }
 
 char * ls_concat(char *string1, char *string2, b32 hasToFree)

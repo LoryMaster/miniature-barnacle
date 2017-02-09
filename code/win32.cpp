@@ -402,12 +402,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 {
 	//Win32_SetFnPointers();
 
-	char *string = ls_ftoa(-0.0f);
-
-	ls_ftoa(1.0f);
-	ls_ftoa(-14.3125f);
-	ls_ftoa(-0.5f);
-
 	LARGE_INTEGER QueryFreq = {};
 	if (!QueryPerformanceFrequency(&QueryFreq))
 	{
