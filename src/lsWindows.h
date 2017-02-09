@@ -1719,5 +1719,5 @@ WINGDIAPI	BOOL		WINAPI		SwapBuffers(HDC);
 #ifdef _DEBUG
 #define Assert(condition) if(!condition){DebugBreak();}
 #else
-#define Assert(condition) ((void)0)
+#define Assert(condition) ((void)0);
 #endif

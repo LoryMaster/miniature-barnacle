@@ -414,8 +414,10 @@ char * ls_ftoa(f32 x)
 	char *Result = 0;
 
 	char *IntegerPart = ls_itoa((int)x);
-	u32 fractValue = u32(((u32)x * 1000000) - x * 1000000);
+	s32 fractValue = s32(x * 1000000 - ((s32)x * 1000000));
 	char *FractPart = ls_itoa(fractValue);
+
+	BOOL hasSucceded = 0;
 
 	if (x < 0)
 	{
@@ -423,20 +425,24 @@ char * ls_ftoa(f32 x)
 		char *Part1 = ls_concat(Negative, ".", 0);
 		Result = ls_concat(Part1, FractPart, 0);
 
-		HeapFree(HeapHandle, 0, Negative);
-		HeapFree(HeapHandle, 0, Part1);
+		hasSucceded = HeapFree(HeapHandle, 0, Negative);
+		Assert(hasSucceded);
+		hasSucceded = HeapFree(HeapHandle, 0, Part1);
+		Assert(hasSucceded);
 	}
 	else
 	{
 		char *Part1 = ls_concat(IntegerPart, ".", 0);
 		Result = ls_concat(Part1, FractPart, 0);
-		
-		HeapFree(HeapHandle, 0, Part1);
+
+		hasSucceded = HeapFree(HeapHandle, 0, Part1);
+		Assert(hasSucceded);
 	}
 
-	HeapFree(HeapHandle, 0, IntegerPart);
-	HeapFree(HeapHandle, 0, FractPart);
-	
+	hasSucceded = HeapFree(HeapHandle, 0, IntegerPart);
+	Assert(hasSucceded);
+	hasSucceded = HeapFree(HeapHandle, 0, FractPart);
+	Assert(hasSucceded);
 
 	return Result;
 }
@@ -450,7 +456,7 @@ char * ls_concat(char *string1, char *string2, b32 hasToFree)
 	int string2Len = ls_len(string2);
 
 	int size = string1Len + string2Len;
-	Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size);
+	Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, size+1);
 
 	char *At = string1;
 	int i = 0;
