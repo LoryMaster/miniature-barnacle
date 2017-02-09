@@ -38,10 +38,13 @@ s32 ls_strcmp(char *string1, char *string2);
 void ls_memcpy(void *src, void *dest, size_t size);
 
 //@TODO: Move in its own logging system
-void LogError_(char *Message, s32 Error);
+void LogErrori_(char *Message, s32 Error);
+void LogErrorf_(char *Message, f32 Error);
 
 #ifdef _DEBUG
-#define LogError(name, value) LogError_(name, value)
+#define LogErrori(name, value) LogErrori_(name, value)
+#define LogErrorf(name, value) LogErrorf_(name, value)
 #else
-#define LogError(value)
+#define LogErrori(name, value)
+#define LogErrorf(name, value)
 #endif

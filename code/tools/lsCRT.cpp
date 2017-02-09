@@ -414,7 +414,7 @@ char * ls_ftoa(f32 x)
 	char *Result = 0;
 
 	char *IntegerPart = ls_itoa((int)x);
-	int fractValue = int(((int)x * 1000000) - x * 1000000);
+	u32 fractValue = u32(((u32)x * 1000000) - x * 1000000);
 	char *FractPart = ls_itoa(fractValue);
 
 	if (x < 0)
@@ -546,11 +546,22 @@ void ls_memcpy(void *src, void *dest, size_t size)
 }
 
 //@TODO: Move to proper files for logging system
-void LogError_(char* Message, s32 Error)
+void LogErrori_(char* Message, s32 Error)
 {
 	HANDLE HeapHandle = GetProcessHeap();
 
 	char *toString = ls_itoa(Error);
+	char* ErrorString = ls_concat(Message, toString, 0);
+	HeapFree(HeapHandle, 0, toString);
+	OutputDebugStringA(ErrorString);
+	HeapFree(HeapHandle, 0, ErrorString);
+}
+
+void LogErrorf_(char* Message, f32 Error)
+{
+	HANDLE HeapHandle = GetProcessHeap();
+
+	char *toString = ls_ftoa(Error);
 	char* ErrorString = ls_concat(Message, toString, 0);
 	HeapFree(HeapHandle, 0, toString);
 	OutputDebugStringA(ErrorString);

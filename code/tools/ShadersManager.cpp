@@ -21,7 +21,7 @@ Shader *CreateShaderProgram(MemoryArena *Memory, GLchar *vertexShaderPath, GLcha
 		if (!success)
 		{
 			glGetShaderInfoLog(Result->VertexShader, 512, NULL, infoLog);
-			LogError(infoLog, -1);
+			LogErrori(infoLog, -1);
 		}
 	}
 
@@ -36,7 +36,7 @@ Shader *CreateShaderProgram(MemoryArena *Memory, GLchar *vertexShaderPath, GLcha
 		if (!success)
 		{
 			glGetShaderInfoLog(Result->FragmentShader, 512, NULL, infoLog);
-			LogError(infoLog, -1);
+			LogErrori(infoLog, -1);
 		}
 	}
 
@@ -52,7 +52,7 @@ Shader *CreateShaderProgram(MemoryArena *Memory, GLchar *vertexShaderPath, GLcha
 		if (!success)
 		{
 			glGetProgramInfoLog(Result->Program, 512, NULL, infoLog);
-			LogError(infoLog, -1);
+			LogErrori(infoLog, -1);
 		}
 	}
 	glDeleteShader(Result->VertexShader);

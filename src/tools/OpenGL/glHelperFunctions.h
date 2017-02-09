@@ -218,14 +218,14 @@ extern "C"
 		if (Major == 0)
 		{
 			GLenum Error = glGetError();
-			LogError("In getGLVersion error: ", Error);
+			LogErrori("In getGLVersion error: ", Error);
 		}
 
 		glGetIntegerv(GL_MINOR_VERSION, &Minor);
 		if (Minor == 0)
 		{
 			GLenum Error = glGetError();
-			LogError("In getGLVersion error: ", Error);
+			LogErrori("In getGLVersion error: ", Error);
 		}
 
 		Result = (Major * 10) + Minor;

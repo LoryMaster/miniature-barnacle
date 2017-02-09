@@ -31,7 +31,7 @@ internal VOID Win32_AllocateMemory(Memory *Memory, s32 Size, s32 MinimumAllocati
 	if ((Memory->BeginPointer = VirtualAlloc(NULL, Size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE)) == NULL)
 	{
 		DWORD Error = GetLastError();
-		LogError("When calling VirtualAlloc in Win32_AllocateMemory got error: ", Error);
+		LogErrori("When calling VirtualAlloc in Win32_AllocateMemory got error: ", Error);
 	}
 }
 
@@ -69,14 +69,14 @@ internal VOID Win32_ReadTextFile(Memory *Memory, char *Path, char **Dest)
 	if ((FileHandle = CreateFileA(Path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL)) == INVALID_HANDLE_VALUE)
 	{
 		Error = GetLastError();
-		LogError("When creating a file handle got error: ", Error);
+		LogErrori("When creating a file handle got error: ", Error);
 	}
 
 	LARGE_INTEGER FileSize = {};
 	if (GetFileSizeEx(FileHandle, &FileSize) == 0)
 	{
 		Error = GetLastError();
-		LogError("When getting file size got error: ", Error);
+		LogErrori("When getting file size got error: ", Error);
 	}
 
 	if (Win32_GiveMemory(Memory, (void **)(Dest), FileSize.LowPart) == FALSE)
@@ -89,7 +89,7 @@ internal VOID Win32_ReadTextFile(Memory *Memory, char *Path, char **Dest)
 	if (ReadFile(FileHandle, *Dest, FileSize.LowPart, &BytesRead, NULL) == FALSE)
 	{
 		Error = GetLastError();
-		LogError("When Reading contents of a file got error: ", Error);
+		LogErrori("When Reading contents of a file got error: ", Error);
 	}
 	else
 	{
@@ -112,14 +112,14 @@ internal VOID Win32_ReadEntireFile(const char *Path, FileInfo *FileInfo, Memory 
 	if ((FileHandle = CreateFileA(Path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL)) == INVALID_HANDLE_VALUE)
 	{
 		Error = GetLastError();
-		LogError("When creating a file handle got error: ", Error);
+		LogErrori("When creating a file handle got error: ", Error);
 	}
 
 	LARGE_INTEGER FileSize = {};
 	if (GetFileSizeEx(FileHandle, &FileSize) == 0)
 	{
 		Error = GetLastError();
-		LogError("When getting file size got error: ", Error);
+		LogErrori("When getting file size got error: ", Error);
 	}
 
 	s32 PathLen = ls_len((char *)Path);
@@ -144,7 +144,7 @@ internal VOID Win32_ReadEntireFile(const char *Path, FileInfo *FileInfo, Memory 
 	if (ReadFile(FileHandle, FileInfo->data, FileSize.LowPart, &BytesRead, NULL) == FALSE)
 	{
 		Error = GetLastError();
-		LogError("When Reading contents of a file got error: ", Error);
+		LogErrori("When Reading contents of a file got error: ", Error);
 	}
 	else
 	{
@@ -176,7 +176,7 @@ internal VOID Win32_SetupScreen(ScreenInfo *Screen, s32 Height, s32 Width, HINST
 	if (!RegisterClassA(&Screen->WindowClass))
 	{
 		DWORD Error = GetLastError();
-		LogError("When Registering WindowClass in Win32_SetupScreen got error: ", Error);
+		LogErrori("When Registering WindowClass in Win32_SetupScreen got error: ", Error);
 	}
 
 	//@NOTE: WindowProc function needs to be fully operational before calling CreateWindow(Ex)(A/W) Because it calls it and uses it's return to create the window.
@@ -184,7 +184,7 @@ internal VOID Win32_SetupScreen(ScreenInfo *Screen, s32 Height, s32 Width, HINST
 	if ((Screen->WindowHandle = CreateWindowExA(0L, Screen->WindowClass.lpszClassName, "Win 32 Platform", WS_OVERLAPPED | WS_VISIBLE , CW_USEDEFAULT, CW_USEDEFAULT, Screen->Width, Screen->Height, 0, 0, Instance, 0)) == nullptr)
 	{
 		DWORD Error = GetLastError();
-		LogError("When Retrieving a WindowHandle in Win32_SetupScreen got error: ", Error);
+		LogErrori("When Retrieving a WindowHandle in Win32_SetupScreen got error: ", Error);
 	}
 
 	//@TODO Make this error path more @ROBUST. SetCapture actually returns an Handle to the previous Window owning mouse capture
@@ -192,13 +192,13 @@ internal VOID Win32_SetupScreen(ScreenInfo *Screen, s32 Height, s32 Width, HINST
 	if (SetCapture(Screen->WindowHandle) == NULL)
 	{
 		DWORD Error = GetLastError();
-		LogError("When Setting Mouse Capture in Win32_SetupScreen got error: ", Error);
+		LogErrori("When Setting Mouse Capture in Win32_SetupScreen got error: ", Error);
 	}
 
 	if (SetCursorPos(Screen->Width / 2, Screen->Height / 2) == NULL)
 	{
 		DWORD Error = GetLastError();
-		LogError("When Setting Cursor Position in Win32_SetupScreen got error: ", Error);
+		LogErrori("When Setting Cursor Position in Win32_SetupScreen got error: ", Error);
 	}
 }
 
@@ -325,7 +325,7 @@ internal VOID Win32_ProcessMouse(MouseManager *Mouse, MSG Msg)
 			if (!GetCursorPos(&MousePos))
 			{
 				DWORD Error = GetLastError();
-				LogError("When retrieving mouse position in Win32_ProcessMouse got error: ", Error);
+				LogErrori("When retrieving mouse position in Win32_ProcessMouse got error: ", Error);
 			}
 			Mouse->xOffset = (f32)MousePos.x - Mouse->mouseX;
 			Mouse->yOffset = Mouse->mouseY - (f32)MousePos.y;
@@ -377,7 +377,7 @@ internal LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM wParam, L
 				if (SetCapture(Window) == NULL)
 				{
 					DWORD Error = GetLastError();
-					LogError("When Setting Mouse Capture in WindowProc got error: ", Error);
+					LogErrori("When Setting Mouse Capture in WindowProc got error: ", Error);
 				}
 			}
 			else
@@ -386,7 +386,7 @@ internal LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM wParam, L
 				if (ReleaseCapture() == NULL)
 				{
 					DWORD Error = GetLastError();
-					LogError("When Setting Mouse Capture in WindowProc got error: ", Error);
+					LogErrori("When Setting Mouse Capture in WindowProc got error: ", Error);
 				}
 			}
 			break;
@@ -406,7 +406,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	if (!QueryPerformanceFrequency(&QueryFreq))
 	{
 		DWORD Error = GetLastError();
-		LogError("Error in QueryPerformanceFrequency call: ", Error);
+		LogErrori("Error in QueryPerformanceFrequency call: ", Error);
 	}
 
 	ScreenInfo Screen = {};
@@ -438,7 +438,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	if (!QueryPerformanceCounter(&FirstCounter))
 	{
 		DWORD Error = GetLastError();
-		LogError("Error calling QueryPerformanceCounter at the beginning of the loop: ", Error);
+		LogErrori("Error calling QueryPerformanceCounter at the beginning of the loop: ", Error);
 	}
 	while(Running)
 	{
@@ -471,14 +471,14 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		if (SwapBuffers(Screen.DeviceContext) == FALSE)
 		{
 			DWORD Error = GetLastError();
-			LogError("In swapping buffers error: ", Error);
+			LogErrori("In swapping buffers error: ", Error);
 		}
 
 		LARGE_INTEGER LastCounter = {};
 		if (!QueryPerformanceCounter(&LastCounter))
 		{
 			DWORD Error = GetLastError();
-			LogError("Error calling QueryPerformanceCounter at the end of the loop: ", Error);
+			LogErrori("Error calling QueryPerformanceCounter at the end of the loop: ", Error);
 		}
 
 		s64 CounterDelta = LastCounter.QuadPart - FirstCounter.QuadPart;
