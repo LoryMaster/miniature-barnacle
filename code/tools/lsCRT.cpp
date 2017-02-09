@@ -244,6 +244,8 @@ char * ls_itoa(s32 x)
 //@TODO Actually do this?? @TODO @TODO @TODO @TODO THIS!
 char * ls_ftoa(f32 x)
 {
+	HANDLE HeapHandle = GetProcessHeap();
+
 	// Probably can even remove this memcpy. Gonna keep it for now!
 	u32 floatMemory = 0;
 	ls_memcpy((void *)(&x), (void *)&floatMemory, 4);
@@ -285,7 +287,78 @@ char * ls_ftoa(f32 x)
 	At = (u8 *)(&floatMemory);
 	*ManAt = (*At << 1);
 
-	// AAAND THE MANTISSA IS BE DONE!!!!
+	//
+	// Return Value in case we have negative or positive zero
+	//
+	if ((Exponent == -127) && (Mantissa == 0))
+	{
+		if(Sign == 0) 
+		{ 
+			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 3); 
+			Result[0] = 48;
+			Result[1] = '.';
+			Result[2] = 48;
+			return Result;
+		}
+		else
+		{
+			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 4);
+			Result[0] = '-';
+			Result[1] = 48;
+			Result[2] = '.';
+			Result[3] = 48;
+			return Result;
+		}
+	}
+
+	//
+	// @NOTE: I'm not gonna return values for denormalized numbers (don't really see the point for my uses)
+	//
+
+	//
+	// Return Value in case we have an infinite
+	//
+	if ((Exponent == 128) && (Mantissa == 0))
+	{
+		if (Sign == 0)
+		{
+			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 5);
+			Result[0] = '+';
+			Result[1] = 'i';
+			Result[2] = 'n';
+			Result[3] = 'f';
+			Result[4] = '.';
+			return Result;
+		}
+		else
+		{
+			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 5);
+			Result[0] = '-';
+			Result[1] = 'i';
+			Result[2] = 'n';
+			Result[3] = 'f';
+			Result[4] = '.';
+			return Result;
+		}
+	}
+
+	//
+	// Return Value in case we have a NaN
+	//
+
+	if ((Exponent == 128) && (Mantissa != 0))
+	{
+		Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 3);
+		Result[0] = 'N';
+		Result[1] = 'a';
+		Result[2] = 'N';
+		return Result;
+	}
+
+	//
+	// Return Value for classical, boring Normalized Numbers
+	//
+
 
 
 	//fjl(4)
