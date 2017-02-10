@@ -293,9 +293,6 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	static f32 yawArg = 0.0f;
 	static f32 pitchArg = 0.0f;
 
-	static f32 lastMouseX = 0.0f;
-	static f32 lastMouseY = 0.0f;
-
 	time += PI_32 / 128;
 
 	//@TODO Better Input Control?
@@ -318,21 +315,15 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 
 	if (OpenGL->Camera)
 	{
-		f32 sensitivity = 1.0f;
-		Mouse->xOffset = Mouse->MouseCenterX - Mouse->mouseX;
-		Mouse->yOffset = Mouse->mouseY - Mouse->MouseCenterY;
+		f32 sensitivity = 0.5f;
+		Mouse->xOffset = Mouse->mouseX - Mouse->MouseCenterX;
+		Mouse->yOffset = Mouse->MouseCenterY - Mouse->mouseY;
 
 		f32 xOff = (f32)Mouse->xOffset * sensitivity;
 		f32 yOff = (f32)Mouse->yOffset * sensitivity;
 
 		yawArg += (xOff / (Screen->Height / 2));
 		pitchArg += (yOff / (Screen->Width / 2));
-
-		//LogErrorf("lastMouseX: ", lastMouseX);
-		//OutputDebugStringA("\n");
-		//LogErrorf("lastMouseY: ", lastMouseY);
-		//OutputDebugStringA("\n");
-		//OutputDebugStringA("\n");
 
 		f32 yaw = (f32)ls_atan((f64)yawArg);
 		f32 pitch = (f32)ls_atan((f64)pitchArg);
@@ -352,6 +343,14 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 			//@TODO Re-Math this v3 right here. I've just copy pasta'd it and I don't trust that guy on the web
 			cameraFront = { (f32)ls_cos(yaw) * (f32)ls_cos(pitch), (f32)ls_sine(pitch), (f32)ls_sine(yaw) * (f32)ls_cos(pitch) };
 			cameraFront = Normalize(cameraFront);
+
+			LogErrorf("cameraFront.x: ", cameraFront.x);
+			OutputDebugStringA("\n");
+			LogErrorf("cameraFront.y: ", cameraFront.y);
+			OutputDebugStringA("\n");
+			LogErrorf("cameraFront.z: ", cameraFront.z);
+			OutputDebugStringA("\n");
+			OutputDebugStringA("\n");
 		}
 
 		v3 cameraUp = OpenGL->Camera->worldY;
@@ -399,9 +398,6 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		OpenGL->Camera->target = OpenGL->Camera->pos + V4(cameraFront);
 		
 	}
-
-	lastMouseX = Mouse->mouseX;
-	lastMouseY = Mouse->mouseY;
 
 	//RenderTriangle(Game, Screen, OpenGL, Memory);
 	RenderRectangle(Game, Memory, Screen, OpenGL, right, top, AngleX, AngleY);
