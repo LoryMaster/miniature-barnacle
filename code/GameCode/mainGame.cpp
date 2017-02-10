@@ -316,7 +316,7 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	if (OpenGL->Camera)
 	{
 		f32 sensitivity = 0.5f;
-		Mouse->xOffset = Mouse->mouseX - Mouse->MouseCenterX;
+		Mouse->xOffset = Mouse->MouseCenterX - Mouse->mouseX;
 		Mouse->yOffset = Mouse->MouseCenterY - Mouse->mouseY;
 
 		f32 xOff = (f32)Mouse->xOffset * sensitivity;
@@ -340,17 +340,10 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 
 		if ((yawArg && pitchArg) != 0)
 		{
-			//@TODO Re-Math this v3 right here. I've just copy pasta'd it and I don't trust that guy on the web
-			cameraFront = { (f32)ls_cos(yaw) * (f32)ls_cos(pitch), (f32)ls_sine(pitch), (f32)ls_sine(yaw) * (f32)ls_cos(pitch) };
+			
+			//cameraFront = { (f32)ls_cos(yaw) * (f32)ls_cos(pitch), (f32)ls_sine(pitch), (f32)ls_sine(yaw) * (f32)ls_cos(pitch) };
+			cameraFront = { -(f32)ls_sine(yaw) * (f32)ls_cos(pitch) , (f32)ls_sine(pitch), -(f32)ls_cos(yaw) * (f32)ls_cos(pitch) };
 			cameraFront = Normalize(cameraFront);
-
-			LogErrorf("cameraFront.x: ", cameraFront.x);
-			OutputDebugStringA("\n");
-			LogErrorf("cameraFront.y: ", cameraFront.y);
-			OutputDebugStringA("\n");
-			LogErrorf("cameraFront.z: ", cameraFront.z);
-			OutputDebugStringA("\n");
-			OutputDebugStringA("\n");
 		}
 
 		v3 cameraUp = OpenGL->Camera->worldY;

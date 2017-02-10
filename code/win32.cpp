@@ -327,10 +327,10 @@ internal VOID Win32_ProcessMouse(MouseManager *Mouse, MSG Msg)
 				DWORD Error = GetLastError();
 				LogErrori("When retrieving mouse position in Win32_ProcessMouse got error: ", Error);
 			}
-			//Mouse->xOffset = (f32)MousePos.x - Mouse->mouseX;
-			//Mouse->yOffset = Mouse->mouseY - (f32)MousePos.y;
 			Mouse->mouseX = (f32)MousePos.x;
 			Mouse->mouseY = (f32)MousePos.y;
+			//Mouse->mouseX = (((f32)MousePos.x * 2) / 1920.0f) - 1.0f;
+			//Mouse->mouseY = (((f32)MousePos.y * 2) / 1080.0f) - 1.0f;
 			break;
 		case WM_KEYDOWN:
 			switch (Msg.wParam)
