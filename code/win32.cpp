@@ -327,8 +327,8 @@ internal VOID Win32_ProcessMouse(MouseManager *Mouse, MSG Msg)
 				DWORD Error = GetLastError();
 				LogErrori("When retrieving mouse position in Win32_ProcessMouse got error: ", Error);
 			}
-			Mouse->xOffset = (f32)MousePos.x - Mouse->mouseX;
-			Mouse->yOffset = Mouse->mouseY - (f32)MousePos.y;
+			//Mouse->xOffset = (f32)MousePos.x - Mouse->mouseX;
+			//Mouse->yOffset = Mouse->mouseY - (f32)MousePos.y;
 			Mouse->mouseX = (f32)MousePos.x;
 			Mouse->mouseY = (f32)MousePos.y;
 			break;
@@ -429,6 +429,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	InputManager Input = {};
 	KeyboardManager Keyboard = {};
 	MouseManager Mouse = {};
+	Mouse.MouseCenterX = (f32)Screen.Width / 2.0f;
+	Mouse.MouseCenterY = (f32)Screen.Height / 2.0f;
 	Input.Keyboard	= &Keyboard;
 	Input.Mouse		= &Mouse;
 

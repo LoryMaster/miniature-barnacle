@@ -290,8 +290,11 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	static f32 top = 0.0f;
 	static f32 depth = 0.0f;
 	static f32 time = 0.0f;
-	static f32 yaw = 0.0f;
-	static f32 pitch = 0.0f;
+	static f32 yawArg = 0.0f;
+	static f32 pitchArg = 0.0f;
+
+	static f32 lastMouseX = 0.0f;
+	static f32 lastMouseY = 0.0f;
 
 	time += PI_32 / 128;
 
@@ -316,14 +319,23 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	if (OpenGL->Camera)
 	{
 		f32 sensitivity = 1.0f;
+		Mouse->xOffset = Mouse->MouseCenterX - Mouse->mouseX;
+		Mouse->yOffset = Mouse->mouseY - Mouse->MouseCenterY;
+
 		f32 xOff = (f32)Mouse->xOffset * sensitivity;
 		f32 yOff = (f32)Mouse->yOffset * sensitivity;
 
-		f32 yawArg = (xOff / (Screen->Height / 2));
-		f32 pitchArg = (yOff / (Screen->Width / 2));
+		yawArg += (xOff / (Screen->Height / 2));
+		pitchArg += (yOff / (Screen->Width / 2));
 
-		yaw += (f32)ls_atan((f64)yawArg);
-		pitch += (f32)ls_atan((f64)pitchArg);
+		//LogErrorf("lastMouseX: ", lastMouseX);
+		//OutputDebugStringA("\n");
+		//LogErrorf("lastMouseY: ", lastMouseY);
+		//OutputDebugStringA("\n");
+		//OutputDebugStringA("\n");
+
+		f32 yaw = (f32)ls_atan((f64)yawArg);
+		f32 pitch = (f32)ls_atan((f64)pitchArg);
 
 		f32 MaxPitch = (89.0f*PI_32) / 180.0f;
 
@@ -385,7 +397,11 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		}*/
 
 		OpenGL->Camera->target = OpenGL->Camera->pos + V4(cameraFront);
+		
 	}
+
+	lastMouseX = Mouse->mouseX;
+	lastMouseY = Mouse->mouseY;
 
 	//RenderTriangle(Game, Screen, OpenGL, Memory);
 	RenderRectangle(Game, Memory, Screen, OpenGL, right, top, AngleX, AngleY);

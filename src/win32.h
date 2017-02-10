@@ -90,6 +90,9 @@ struct MouseManager
 
 	f32 xOffset;
 	f32 yOffset;
+
+	f32 MouseCenterX;
+	f32 MouseCenterY;
 	
 	b32 LeftDown	= FALSE;
 	b32 RigthDown	= FALSE;
