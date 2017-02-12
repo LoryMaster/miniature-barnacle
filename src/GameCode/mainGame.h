@@ -3,6 +3,13 @@
 #include "win32.h"
 #include "tools\Maths\Maths.h"
 
+enum GAME_MODE
+{
+	WORLD_MODE,
+
+	NUM_MODE
+};
+
 struct Bitmap
 {
 	void *data;
@@ -15,6 +22,8 @@ struct Bitmap
 
 struct GameInfo
 {
+	GAME_MODE GameMode;
+
 	Bitmap bitmaps[10];
 	u32 NextBitmapIndex;
 };

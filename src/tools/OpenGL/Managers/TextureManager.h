@@ -15,10 +15,11 @@ enum TEXTURE_ENUM
 struct Texture
 {
 	GLuint			*Tex;
-	
+	char			**Path;
+
 	u32				texQuantity;
-	TEXTURE_ENUM	Name;
+	TEXTURE_ENUM	*Name;
 };
 
-Texture *InitTextureManager(MemoryArena *Memory, u32 texQuantity);
-void GenAndBindTexture(const char *Path, GameInfo *Game, MemoryArena *Memory, Texture *TextureManager, TEXTURE_ENUM Name);
+Texture *InitTextureManager(MemoryArena *Memory, char **Paths, TEXTURE_ENUM *Names, u32 texQuantity);
+void GenAndBindTexture(const char *Path, GameInfo *Game, MemoryArena *Memory, Texture *TextureManager, u32 idx);

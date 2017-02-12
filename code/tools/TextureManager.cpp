@@ -1,23 +1,25 @@
 #include "tools\OpenGL\Managers\TextureManager.h"
 
-Texture *InitTextureManager(MemoryArena *Memory, u32 texQuantity)
+Texture *InitTextureManager(MemoryArena *Memory, char **Paths, TEXTURE_ENUM *Names, u32 texQuantity)
 {
 	Texture *TextureManager;
 
 	Memory->Alloc(&Memory->PermanentMemory, (void **)(&TextureManager), sizeof(Texture));
 
 	Memory->Alloc(&Memory->PermanentMemory, (void **)(&TextureManager->Tex), texQuantity * sizeof(GLuint));
+	Memory->Alloc(&Memory->PermanentMemory, (void **)(&TextureManager->Name), texQuantity * sizeof(TEXTURE_ENUM));
+
 	TextureManager->texQuantity = texQuantity;
+	TextureManager->Path = Paths;
+	TextureManager->Name = Names;
 
 	return TextureManager;
 }
 
-void GenAndBindTexture(const char *Path, GameInfo *Game, MemoryArena *Memory, Texture *TextureManager, TEXTURE_ENUM Name)
+void GenAndBindTexture(const char *Path, GameInfo *Game, MemoryArena *Memory, Texture *TextureManager, u32 idx)
 {
-	TextureManager->Name = Name;
-
-	glGenTextures(1, &TextureManager->Tex[Name]);
-	glBindTexture(GL_TEXTURE_2D, TextureManager->Tex[Name]);
+	glGenTextures(1, &TextureManager->Tex[idx]);
+	glBindTexture(GL_TEXTURE_2D, TextureManager->Tex[idx]);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

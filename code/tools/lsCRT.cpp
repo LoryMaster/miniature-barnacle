@@ -286,128 +286,6 @@ char * ls_itoa(s32 x)
 	return nullptr;
 }
 
-//@NOTE: Figured this is waaay too overcomplicated for a proper float conversion to string. let's just integer divide a couple of times.
-// But it was fun to understand and solve these problems. Anyway, I solved it, so I'm happy about that :D
-//char * ls_ftoa(f32 x)
-//{
-//	HANDLE HeapHandle = GetProcessHeap();
-//
-//	// Probably can even remove this memcpy. Gonna keep it for now!
-//	u32 floatMemory = 0;
-//	ls_memcpy((void *)(&x), (void *)&floatMemory, 4);
-//	
-//	char *Result = 0;
-//	u8 *At = (u8 *)(&floatMemory) + 3;
-//	u8 Sign = (*At >> 7) & 1u;
-//
-//	At = (u8 *)(&floatMemory) + 2;
-//	u8 LastExpBit = (*At >> 7) & 1u;
-//
-//	At = (u8 *)(&floatMemory) + 3;
-//	s8 Exponent = (*At << 1);
-//	Exponent |= LastExpBit << 0;
-//	Exponent -= 127;
-//
-//	u32 Mantissa = 0;
-//
-//	//Byte 3 of the mantissa minus bit 7
-//	u8 *ManAt = (u8 *)(&Mantissa) + 3;
-//	At = (u8 *)(&floatMemory) + 2;
-//	*ManAt = (*At << 1);
-//	
-//	// Adding bit 7 to byte 3
-//	At = (u8 *)(&floatMemory) + 1;
-//	*ManAt |= (*At >> 7) << 0;
-//
-//	//Byte 2 of the mantissa minus bit 15
-//	ManAt = (u8 *)(&Mantissa) + 2;
-//	At = (u8 *)(&floatMemory) + 1;
-//	*ManAt = (*At << 1);
-//
-//	// Adding bit 15 to byte 2
-//	At = (u8 *)(&floatMemory);
-//	*ManAt |= (*At >> 7) << 0;
-//
-//	//Byte 1 of the mantissa 
-//	ManAt = (u8 *)(&Mantissa) + 1;
-//	At = (u8 *)(&floatMemory);
-//	*ManAt = (*At << 1);
-//
-//	//
-//	// Return Value in case we have negative or positive zero
-//	//
-//	if ((Exponent == -127) && (Mantissa == 0))
-//	{
-//		if(Sign == 0) 
-//		{ 
-//			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 3); 
-//			Result[0] = 48;
-//			Result[1] = '.';
-//			Result[2] = 48;
-//			return Result;
-//		}
-//		else
-//		{
-//			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 4);
-//			Result[0] = '-';
-//			Result[1] = 48;
-//			Result[2] = '.';
-//			Result[3] = 48;
-//			return Result;
-//		}
-//	}
-//
-//	//
-//	// @NOTE: I'm not gonna return values for denormalized numbers (don't really see the point for my uses)
-//	//
-//
-//	//
-//	// Return Value in case we have an infinite
-//	//
-//	if ((Exponent == 128) && (Mantissa == 0))
-//	{
-//		if (Sign == 0)
-//		{
-//			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 5);
-//			Result[0] = '+';
-//			Result[1] = 'i';
-//			Result[2] = 'n';
-//			Result[3] = 'f';
-//			Result[4] = '.';
-//			return Result;
-//		}
-//		else
-//		{
-//			Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 5);
-//			Result[0] = '-';
-//			Result[1] = 'i';
-//			Result[2] = 'n';
-//			Result[3] = 'f';
-//			Result[4] = '.';
-//			return Result;
-//		}
-//	}
-//
-//	//
-//	// Return Value in case we have a NaN
-//	//
-//
-//	if ((Exponent == 128) && (Mantissa != 0))
-//	{
-//		Result = (char *)HeapAlloc(HeapHandle, HEAP_ZERO_MEMORY, 3);
-//		Result[0] = 'N';
-//		Result[1] = 'a';
-//		Result[2] = 'N';
-//		return Result;
-//	}
-//
-//	//
-//	// Return Value for classical, boring Normalized Numbers
-//	//
-//
-//	return 0;
-//}
-
 char * ls_ftoa(f32 x)
 {
 	HANDLE HeapHandle = GetProcessHeap();
@@ -532,6 +410,82 @@ s32 ls_strcmp(char *string1, char *string2)
 	return 2;
 }
 
+s32 ls_strcpy(char *dest, char *src, bool nullTerminate)
+{
+	char *At = src;
+	char *To = dest;
+
+	s32 srcLen = ls_len(src);
+	s32 c = 0;
+
+	s32 it = srcLen;
+	if (nullTerminate) { it += 1; }
+	while (it--)
+	{
+		*To = *At;
+		At++;
+		To++;
+		c++;
+	}
+
+	return c;
+}
+
+s32 ls_sprintf(char *dest, const char *format, ...)
+{
+	HANDLE HeapHandle = GetProcessHeap();
+
+	char buff[1024] = {};
+	const char *p = format;
+	char *s = 0;
+
+	s32 nInt = 0;
+	f32 nFloat = 0.0f;
+
+	va_list argList;
+	va_start(argList, format);
+
+	s32 i = 0;
+	for (p = format; *p != 0; p++)
+	{
+		if (*p != '%')
+		{
+			buff[i] = *p;
+			i++;
+			continue;
+		}
+
+		switch (*++p)
+		{
+			case 'd':
+				nInt = va_arg(argList, s32);
+				s = ls_itoa(nInt);
+				i += ls_strcpy(buff + i, s, 0);
+				HeapFree(HeapHandle, 0, s);
+				break;
+
+			case 'f':
+				nFloat = (f32)va_arg(argList, f64);
+				s = ls_ftoa(nFloat);
+				i += ls_strcpy(buff + i, s, 0);
+				HeapFree(HeapHandle, 0, s);
+				break;
+			
+			case '%':
+				buff[i] = '%';
+				i++;
+				break;
+		}
+	}
+	va_end(argList);
+
+	buff[i] = 0;
+	i++;
+	ls_memcpy(buff, dest, i);
+
+	return i;
+}
+
 ////////////////////////////////////////////////////
 //	MEMORY FUNCTIONS
 ////////////////////////////////////////////////////
@@ -557,7 +511,7 @@ void LogErrori_(char* Message, s32 Error)
 	HANDLE HeapHandle = GetProcessHeap();
 
 	char *toString = ls_itoa(Error);
-	char* ErrorString = ls_concat(Message, toString, 0);
+	char *ErrorString = ls_concat(Message, toString, 0);
 	HeapFree(HeapHandle, 0, toString);
 	OutputDebugStringA(ErrorString);
 	HeapFree(HeapHandle, 0, ErrorString);
@@ -568,7 +522,7 @@ void LogErrorf_(char* Message, f32 Error)
 	HANDLE HeapHandle = GetProcessHeap();
 
 	char *toString = ls_ftoa(Error);
-	char* ErrorString = ls_concat(Message, toString, 0);
+	char *ErrorString = ls_concat(Message, toString, 0);
 	HeapFree(HeapHandle, 0, toString);
 	OutputDebugStringA(ErrorString);
 	HeapFree(HeapHandle, 0, ErrorString);

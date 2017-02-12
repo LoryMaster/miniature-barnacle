@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lsWindows.h"
+#include <stdarg.h>
 
 #define fil(value) for(int i = 0; i < value; i++)
 #define fjl(value) for(int j = 0; j < value; j++)
@@ -30,6 +31,9 @@ char * ls_itoa(s32 x);
 char * ls_ftoa(f32 x);
 char * ls_concat(char *string1, char *string2, b32 hasToFree);
 s32 ls_strcmp(char *string1, char *string2);
+s32 ls_strcpy(char *dest, char *src, bool nullTerminate);
+
+s32 ls_sprintf(char *dest, const char *format, ...);
 
 ////////////////////////////////////////////////////
 //	MEMORY FUNCTIONS

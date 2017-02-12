@@ -101,7 +101,6 @@ struct MouseManager
 
 enum VAO_Type
 {
-	VAO_NOT_SET,
 	VAO_TRIANGLE,
 	VAO_RECTANGLE,
 
@@ -111,6 +110,15 @@ enum VAO_Type
 struct Shader;
 struct Texture;
 struct Camera;
+
+struct VertexData
+{
+	GLfloat *vertices;
+	size_t verticesSize;
+
+	GLuint *indices;
+	size_t indicesSize;
+};
 
 struct VAO_Container
 {
@@ -128,8 +136,6 @@ struct OpenGLInfo
 	u32				NextAvailableIndex;
 
 	Camera			*Camera;
-
-	b32				isOpenGLInit;
 };
 
 struct InputManager

@@ -26,6 +26,58 @@ void LoadTexture(GameInfo *Game, MemoryArena *Memory, const char *Path)
 	}
 }
 
+//@TODO Better Input Control?
+internal void ProcessWorldInput(KeyboardManager *Keyboard, f32 *AngleX, f32 *AngleY)
+{
+	if (Keyboard->Key_W == TRUE)
+	{
+		*AngleX += 0.1f;
+	}
+	if (Keyboard->Key_D == TRUE)
+	{
+		*AngleY += 0.1f;
+	}
+	if (Keyboard->Key_S == TRUE)
+	{
+		*AngleX -= 0.1f;
+	}
+	if (Keyboard->Key_A == TRUE)
+	{
+		*AngleY -= 0.1f;
+	}
+}
+
+//@TODO Better Input Control?
+internal void ProcessCameraInput(KeyboardManager *Keyboard, Camera *Camera, v3 cameraFront)
+{
+	v3 cameraUp = Camera->worldY;
+
+	if (Keyboard->RightArrow == TRUE)
+	{
+		Camera->pos = Camera->pos + V4((Normalize(cameraFront ^ cameraUp) * Camera->speed));
+	}
+	if (Keyboard->UpArrow == TRUE)
+	{
+		Camera->pos = Camera->pos + V4(cameraUp * Camera->speed);
+	}
+	if (Keyboard->LeftArrow == TRUE)
+	{
+		Camera->pos = Camera->pos - V4((Normalize(cameraFront ^ cameraUp) * Camera->speed));
+	}
+	if (Keyboard->DownArrow == TRUE)
+	{
+		Camera->pos = Camera->pos - V4(cameraUp * Camera->speed);
+	}
+	if (Keyboard->Key_Shift == TRUE)
+	{
+		Camera->pos = Camera->pos - V4(cameraFront * Camera->speed);
+	}
+	if (Keyboard->Key_Ctrl == TRUE)
+	{
+		Camera->pos = Camera->pos + V4(cameraFront * Camera->speed);
+	}
+}
+
 internal void InitCamera(OpenGLInfo *OpenGL, MemoryArena *Memory)
 {
 	v4 pos = { 0.0f, 0.0f, 15.0f, 1.0f };
@@ -214,13 +266,13 @@ internal void RenderRectangle(GameInfo *Game, MemoryArena *Memory, ScreenInfo *S
 		glBindVertexArray(0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		Texture *Tex = InitTextureManager(Memory, 2);
+		/*Texture *Tex = InitTextureManager(Memory, 2);
 		GenAndBindTexture("W:/doubleMouse/resources/test.bmp", Game, Memory, Tex, TEX_TEST);
-		GenAndBindTexture("W:/doubleMouse/resources/facciaDiUaua.bmp", Game, Memory, Tex, TEX_TEST_2);
+		GenAndBindTexture("W:/doubleMouse/resources/facciaDiUaua.bmp", Game, Memory, Tex, TEX_TEST_2);*/
 
 		Shader *ShaderProgram = CreateShaderProgram(Memory, "W:/doubleMouse/code/Shaders/RectangleVert.vs", "W:/doubleMouse/code/Shaders/RectangleFrag.frag");
 		OpenGL->VAOs[1].ShaderProgram = ShaderProgram;
-		OpenGL->VAOs[1].Texture = Tex;
+		//OpenGL->VAOs[1].Texture = Tex;
 
 		if(!Program) {Program = &OpenGL->VAOs[1].ShaderProgram->Program;}
 
@@ -269,16 +321,102 @@ internal void RenderRectangle(GameInfo *Game, MemoryArena *Memory, ScreenInfo *S
 	glBindVertexArray(0);
 }
 
+internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Type, f32 AngleX, f32 AngleY)
+{
+	GLuint VAO = OpenGL->VAOs[Type].VAO;
+	GLuint Program = OpenGL->VAOs[Type].ShaderProgram->Program;
+	Texture *Texture = OpenGL->VAOs[1].Texture;
+
+	glUseProgram(Program);
+
+	fil(Texture->texQuantity - 1)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, Texture->Tex[i]);
+	}
+	/*@TODO: Needs to be generalized with sprintf() function*/
+	glUniform1i(glGetUniformLocation(Program, "myTexture[0]"), 0);
+	glUniform1i(glGetUniformLocation(Program, "myTexture[1]"), 1);
+
+	v4 cube[3] =
+	{
+		{ 0.0f,  0.0f,  0.0f, 1.0f },
+		{ 2.0f,  5.0f, -15.0f, 1.0f },
+		{ -1.5f, -2.2f, -2.5f, 1.0f }
+	};
+
+	Mat4 ModelMatrix = {};
+	//@Learn The view Matrix Works properly now! But learn how opengl positions things? Where's 0,0,0?
+	Mat4 ViewMatrix = LookAt(*OpenGL->Camera);
+	Mat4 ProjectionMatrix = PerspectiveProjFOV(PI_32 / 4.0f, 1920.0f / 1080.0f, 0.1f, 100.0f);
+	Mat4 Transform = {};
+
+	glBindVertexArray(VAO);
+	fil(3)
+	{
+		ModelMatrix = Translate(cube[i]) * RotateX((PI_32 / 32)*AngleX) * RotateY((PI_32 / 32)*AngleY);
+		Transform = ProjectionMatrix * ViewMatrix * ModelMatrix;
+		GLuint TransformLoc = glGetUniformLocation(Program, "transform");
+		glUniformMatrix4fv(TransformLoc, 1, GL_TRUE, (GLfloat *)Transform.values);
+
+		glDrawArrays(GL_TRIANGLES, 0, (GLsizei)(Vertex.verticesSize / 5));
+	}
+	glBindVertexArray(0);
+}
+
+internal void SetupVAO(GameInfo *Game, MemoryArena *Memory, OpenGLInfo *OpenGL, VAO_Type Type, VertexData Vertex, Texture *Tex, char *VSPath, char *FSPath)
+{
+	GLuint *VAO = &OpenGL->VAOs[Type].VAO;
+	GLuint *Program = 0;
+
+	if (!(*VAO && *Program))
+	{
+		glGenVertexArrays(1, VAO);
+		glBindVertexArray(*VAO);
+
+		GLuint VBO, EBO;
+		glGenBuffers(1, &VBO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, Vertex.verticesSize, Vertex.vertices, GL_STATIC_DRAW);
+
+		glGenBuffers(1, &EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Vertex.indicesSize, Vertex.indices, GL_STATIC_DRAW);
+
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(0);
+
+		//glVertexAttribPointer(1, 2/*3*/, GL_FLOAT, GL_FALSE, /*8*/ 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		//glEnableVertexAttribArray(1);
+
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(2);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+		fil(Tex->texQuantity - 1)
+		{
+			GenAndBindTexture(Tex->Path[i], Game, Memory, Tex, i);
+		}
+		
+		Shader *ShaderProgram = CreateShaderProgram(Memory, VSPath, FSPath);
+		OpenGL->VAOs[Type].ShaderProgram = ShaderProgram;
+		OpenGL->VAOs[Type].Texture = Tex;
+
+		if (!Program) { Program = &OpenGL->VAOs[1].ShaderProgram->Program; }
+
+		OpenGL->VAOs[Type].Type = Type;
+		OpenGL->VAOs[Type].IndexInContainer = OpenGL->NextAvailableIndex;
+		OpenGL->NextAvailableIndex++;
+	}
+}
+
 extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen, OpenGLInfo *OpenGL, InputManager *Input)
 {
 	KeyboardManager *Keyboard = Input->Keyboard;
 	MouseManager	*Mouse = Input->Mouse;
-
-	if (!OpenGL->isOpenGLInit)
-	{
-		OpenGL->NextAvailableIndex = 0; 
-		OpenGL->isOpenGLInit = TRUE;
-	}
 
 	if (!OpenGL->Camera) { InitCamera(OpenGL, Memory); }
 
@@ -288,30 +426,10 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	static f32 AngleY = 1.0f;
 	static f32 right = 0.0f;
 	static f32 top = 0.0f;
-	static f32 depth = 0.0f;
-	static f32 time = 0.0f;
 	static f32 yawArg = 0.0f;
 	static f32 pitchArg = 0.0f;
 
-	time += PI_32 / 128;
-
-	//@TODO Better Input Control?
-	if (Keyboard->Key_W == TRUE)
-	{
-		AngleX += 0.1f;		
-	}
-	if (Keyboard->Key_D == TRUE)
-	{
-		AngleY += 0.1f;
-	}
-	if (Keyboard->Key_S == TRUE)
-	{
-		AngleX -= 0.1f;
-	}
-	if (Keyboard->Key_A == TRUE)
-	{
-		AngleY -= 0.1f;
-	}
+	ProcessWorldInput(Keyboard, &AngleX, &AngleY);
 
 	if (OpenGL->Camera)
 	{
@@ -340,56 +458,13 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 
 		if ((yawArg && pitchArg) != 0)
 		{
-			
-			//cameraFront = { (f32)ls_cos(yaw) * (f32)ls_cos(pitch), (f32)ls_sine(pitch), (f32)ls_sine(yaw) * (f32)ls_cos(pitch) };
 			cameraFront = { -(f32)ls_sine(yaw) * (f32)ls_cos(pitch) , (f32)ls_sine(pitch), -(f32)ls_cos(yaw) * (f32)ls_cos(pitch) };
 			cameraFront = Normalize(cameraFront);
 		}
 
-		v3 cameraUp = OpenGL->Camera->worldY;
-		if (Keyboard->RightArrow == TRUE)
-		{
-			OpenGL->Camera->pos = OpenGL->Camera->pos + V4((Normalize(cameraFront ^ cameraUp) * OpenGL->Camera->speed));
-			//right += 0.1f;
-		}
-		if (Keyboard->UpArrow == TRUE)
-		{
-			OpenGL->Camera->pos = OpenGL->Camera->pos + V4(cameraUp * OpenGL->Camera->speed);
-			//top += 0.1f;
-		}
-		if (Keyboard->LeftArrow == TRUE)
-		{
-			OpenGL->Camera->pos = OpenGL->Camera->pos - V4((Normalize(cameraFront ^ cameraUp) * OpenGL->Camera->speed));
-			//right -= 0.1f;
-		}
-		if (Keyboard->DownArrow == TRUE)
-		{
-			OpenGL->Camera->pos = OpenGL->Camera->pos - V4(cameraUp * OpenGL->Camera->speed);
-			//top -= 0.1f;
-		}
-		if (Keyboard->Key_Shift == TRUE)
-		{
-			OpenGL->Camera->pos = OpenGL->Camera->pos - V4(cameraFront * OpenGL->Camera->speed);
-			//depth += 0.1f;
-		}
-		if (Keyboard->Key_Ctrl == TRUE)
-		{
-			OpenGL->Camera->pos = OpenGL->Camera->pos + V4(cameraFront * OpenGL->Camera->speed);
-			//depth -= 0.1f;
-		}
-
-		// Crazy rotating camera around a target (0.0, 0.0, 0.0)
-		/*if (OpenGL->Camera)
-		{
-			f32 camX = f32(ls_sine((f64)time)) * 15.0f;
-			f32 camZ = f32(ls_cos((f64)time)) * 15.0f;
-			v4 deltaPos = { camX, 0.0f, camZ, 1.0f };
-			OpenGL->Camera->pos = {0.0f, 0.0f, 0.0f, 1.0f};
-			OpenGL->Camera->pos = Translate(deltaPos) * OpenGL->Camera->pos;
-		}*/
+		ProcessCameraInput(Keyboard, OpenGL->Camera, cameraFront);
 
 		OpenGL->Camera->target = OpenGL->Camera->pos + V4(cameraFront);
-		
 	}
 
 	//RenderTriangle(Game, Screen, OpenGL, Memory);
