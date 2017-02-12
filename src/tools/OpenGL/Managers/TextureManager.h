@@ -17,7 +17,7 @@ struct Texture
 	GLuint			*Tex;
 	char			**Path;
 
-	u32				texQuantity;
+	s32				texQuantity;
 	TEXTURE_ENUM	*Name;
 };
 

@@ -329,14 +329,14 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 
 	glUseProgram(Program);
 
-	fil(Texture->texQuantity - 1)
+	char texName[24] = {};
+	fil(Texture->texQuantity)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, Texture->Tex[i]);
+		ls_sprintf(texName, "myTexture[%d]", i);
+		glUniform1i(glGetUniformLocation(Program, texName), i);
 	}
-	/*@TODO: Needs to be generalized with sprintf() function*/
-	glUniform1i(glGetUniformLocation(Program, "myTexture[0]"), 0);
-	glUniform1i(glGetUniformLocation(Program, "myTexture[1]"), 1);
 
 	v4 cube[3] =
 	{
@@ -368,6 +368,11 @@ internal void SetupVAO(GameInfo *Game, MemoryArena *Memory, OpenGLInfo *OpenGL, 
 {
 	GLuint *VAO = &OpenGL->VAOs[Type].VAO;
 	GLuint *Program = 0;
+	
+	if (&OpenGL->VAOs[Type].ShaderProgram)
+	{
+		Program = &OpenGL->VAOs[Type].ShaderProgram->Program;
+	}
 
 	if (!(*VAO && *Program))
 	{
@@ -396,7 +401,7 @@ internal void SetupVAO(GameInfo *Game, MemoryArena *Memory, OpenGLInfo *OpenGL, 
 		glBindVertexArray(0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		fil(Tex->texQuantity - 1)
+		fil(Tex->texQuantity)
 		{
 			GenAndBindTexture(Tex->Path[i], Game, Memory, Tex, i);
 		}
@@ -467,8 +472,90 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		OpenGL->Camera->target = OpenGL->Camera->pos + V4(cameraFront);
 	}
 
+
+	//TEMPORARY VERTEX DATA
+	GLfloat vertices[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+	};
+
+	GLuint indices[] =
+	{
+		0, 1, 2,
+		2, 3, 0,
+
+		0, 1, 2,
+		2, 3, 0,
+
+		0, 1, 2,
+		2, 3, 0,
+
+		0, 1, 2,
+		2, 3, 0,
+
+		0, 1, 2,
+		2, 3, 0,
+
+		0, 1, 2,
+		2, 3, 0,
+	};
+	//TEMPORARY VERTEX DATA^^
+
+
+	VertexData Vertex = {};
+	Vertex.indices = indices;
+	Vertex.indicesSize = sizeof(indices);
+	Vertex.vertices = vertices;
+	Vertex.verticesSize = sizeof(vertices);
+
+	char *Paths[2] = { {"W:/doubleMouse/resources/test.bmp"}, {"W:/doubleMouse/resources/facciaDiUaua.bmp"} };
+	TEXTURE_ENUM Names[2] = { TEX_TEST, TEX_TEST_2 };
+	Texture *Tex = InitTextureManager(Memory, Paths, Names, 2);
+
+	SetupVAO(Game, Memory, OpenGL, VAO_RECTANGLE, Vertex, Tex, "W:/doubleMouse/code/Shaders/RectangleVert.vs", "W:/doubleMouse/code/Shaders/RectangleFrag.frag");
+	RenderToScreen(OpenGL, Vertex, VAO_RECTANGLE, AngleX, AngleY);
+
 	//RenderTriangle(Game, Screen, OpenGL, Memory);
-	RenderRectangle(Game, Memory, Screen, OpenGL, right, top, AngleX, AngleY);
+	//RenderRectangle(Game, Memory, Screen, OpenGL, right, top, AngleX, AngleY);
 
 	return;
 }
