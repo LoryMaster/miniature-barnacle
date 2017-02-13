@@ -87,6 +87,13 @@ internal void InitCamera(OpenGLInfo *OpenGL, MemoryArena *Memory)
 	OpenGL->Camera = Camera;
 }
 
+internal void InitTransform(OpenGLInfo *OpenGL, MemoryArena *Memory)
+{
+	TransformManager *Transform = createTransform(Memory);
+
+	OpenGL->Transform = Transform;
+}
+
 internal void RenderTriangle(GameInfo *Game, ScreenInfo *Screen, OpenGLInfo *OpenGL, MemoryArena *Memory)
 {
 	//TEMPORARY, MAKE FINDING FUNCTION MAYBE?
@@ -321,7 +328,7 @@ internal void RenderRectangle(GameInfo *Game, MemoryArena *Memory, ScreenInfo *S
 	glBindVertexArray(0);
 }
 
-internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Type, f32 AngleX, f32 AngleY)
+internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Type)
 {
 	GLuint VAO = OpenGL->VAOs[Type].VAO;
 	GLuint Program = OpenGL->VAOs[Type].ShaderProgram->Program;
@@ -338,29 +345,11 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 		glUniform1i(glGetUniformLocation(Program, texName), i);
 	}
 
-	v4 cube[3] =
-	{
-		{ 0.0f,  0.0f,  0.0f, 1.0f },
-		{ 2.0f,  5.0f, -15.0f, 1.0f },
-		{ -1.5f, -2.2f, -2.5f, 1.0f }
-	};
-
-	Mat4 ModelMatrix = {};
-	//@Learn The view Matrix Works properly now! But learn how opengl positions things? Where's 0,0,0?
-	Mat4 ViewMatrix = LookAt(*OpenGL->Camera);
-	Mat4 ProjectionMatrix = PerspectiveProjFOV(PI_32 / 4.0f, 1920.0f / 1080.0f, 0.1f, 100.0f);
-	Mat4 Transform = {};
-
 	glBindVertexArray(VAO);
-	fil(3)
-	{
-		ModelMatrix = Translate(cube[i]) * RotateX((PI_32 / 32)*AngleX) * RotateY((PI_32 / 32)*AngleY);
-		Transform = ProjectionMatrix * ViewMatrix * ModelMatrix;
-		GLuint TransformLoc = glGetUniformLocation(Program, "transform");
-		glUniformMatrix4fv(TransformLoc, 1, GL_TRUE, (GLfloat *)Transform.values);
+	GLuint TransformLoc = glGetUniformLocation(Program, "transform");
+	glUniformMatrix4fv(TransformLoc, 1, GL_TRUE, (GLfloat *)OpenGL->Transform->Transform.values);
 
-		glDrawArrays(GL_TRIANGLES, 0, (GLsizei)(Vertex.verticesSize / 5));
-	}
+	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)(Vertex.verticesSize / 5));
 	glBindVertexArray(0);
 }
 
@@ -423,7 +412,8 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	KeyboardManager *Keyboard = Input->Keyboard;
 	MouseManager	*Mouse = Input->Mouse;
 
-	if (!OpenGL->Camera) { InitCamera(OpenGL, Memory); }
+	if (!OpenGL->Camera)	{ InitCamera(OpenGL, Memory); }
+	if (!OpenGL->Transform) { InitTransform(OpenGL, Memory); }
 
 	static v3 cameraFront = { 0.0f, 0.0f, -1.0f };
 
@@ -538,6 +528,14 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		0, 1, 2,
 		2, 3, 0,
 	};
+
+	v4 cube[3] =
+	{
+		{ 0.0f,  0.0f,  0.0f, 1.0f },
+		{ 2.0f,  5.0f, -15.0f, 1.0f },
+		{ -1.5f, -2.2f, -2.5f, 1.0f }
+	};
+	v4 scale = { 1.0f, 1.0f, 1.0f, 1.0f };
 	//TEMPORARY VERTEX DATA^^
 
 	VertexData Vertex = {};
@@ -551,7 +549,19 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	Texture *Tex = InitTextureManager(Memory, Paths, Names, 2);
 
 	SetupVAO(Game, Memory, OpenGL, VAO_RECTANGLE, Vertex, Tex, "W:/doubleMouse/code/Shaders/RectangleVert.vs", "W:/doubleMouse/code/Shaders/RectangleFrag.frag");
-	RenderToScreen(OpenGL, Vertex, VAO_RECTANGLE, AngleX, AngleY);
+
+	TransformManager *Transf = OpenGL->Transform;
+
+	SetStandardProjection(Transf);
+	fil(3)
+	{
+		SetView(Transf, *OpenGL->Camera);
+		SetModel(Transf, cube[i], scale, AngleX, AngleY);
+
+		SetTransform(Transf);
+
+		RenderToScreen(OpenGL, Vertex, VAO_RECTANGLE);
+	}
 
 	//RenderTriangle(Game, Screen, OpenGL, Memory);
 	//RenderRectangle(Game, Memory, Screen, OpenGL, right, top, AngleX, AngleY);

@@ -110,6 +110,7 @@ enum VAO_Type
 struct Shader;
 struct Texture;
 struct Camera;
+struct TransformManager;
 
 struct VertexData
 {
@@ -132,10 +133,11 @@ struct VAO_Container
 
 struct OpenGLInfo
 {
-	VAO_Container	VAOs[10];
-	u32				NextAvailableIndex;
+	VAO_Container		VAOs[10];
+	u32					NextAvailableIndex;
 
-	Camera			*Camera;
+	Camera				*Camera;
+	TransformManager	*Transform;
 };
 
 struct InputManager

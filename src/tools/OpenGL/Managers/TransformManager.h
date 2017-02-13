@@ -12,6 +12,7 @@ struct TransformManager
 	Mat4 Transform;
 };
 
+TransformManager *createTransform(MemoryArena *Memory);
 
 void SetTransform(TransformManager *Manager);
 void SetModel(TransformManager *Manager, v4 translate, v4 scale, f32 RotateX, f32 RotateY);
