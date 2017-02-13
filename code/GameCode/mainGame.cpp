@@ -540,7 +540,6 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	};
 	//TEMPORARY VERTEX DATA^^
 
-
 	VertexData Vertex = {};
 	Vertex.indices = indices;
 	Vertex.indicesSize = sizeof(indices);
