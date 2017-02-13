@@ -103,6 +103,7 @@ enum VAO_Type
 {
 	VAO_TRIANGLE,
 	VAO_RECTANGLE,
+	VAO_LIGHT,
 
 	VAO_MAX
 };
