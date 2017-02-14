@@ -313,6 +313,7 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	Texture *Tex = InitTextureManager(Memory, Paths, Names, 2);
 
 	SetupVAO(Game, Memory, OpenGL, VAO_RECTANGLE, Vertex, Tex, "W:/doubleMouse/code/Shaders/RectangleVert.vs", "W:/doubleMouse/code/Shaders/RectangleFrag.frag");
+	SetupVAO(Game, Memory, OpenGL, VAO_LIGHT_CONTAINER, Vertex, Tex, "W:/doubleMouse/code/Shaders/LightContainerVert.vs", "W:/doubleMouse/code/Shaders/LightContainerFrag.frag");
 	SetupVAO(Game, Memory, OpenGL, VAO_LIGHT, Vertex, Tex, "W:/doubleMouse/code/Shaders/LightVert.vs", "W:/doubleMouse/code/Shaders/LightFrag.frag");
 
 	TransformManager *Transf = OpenGL->Transform;
@@ -332,6 +333,10 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	SetModel(Transf, cube[0], scale, AngleX, AngleY);
 
 	RenderToScreen(OpenGL, Vertex, VAO_LIGHT);
+
+	SetModel(Transf, cube[2], scale, AngleX, AngleY);
+
+	RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
 
 	return;
 }

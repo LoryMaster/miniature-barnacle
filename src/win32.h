@@ -103,6 +103,7 @@ enum VAO_Type
 {
 	VAO_TRIANGLE,
 	VAO_RECTANGLE,
+	VAO_LIGHT_CONTAINER,
 	VAO_LIGHT,
 
 	VAO_MAX
@@ -134,7 +135,7 @@ struct VAO_Container
 
 struct OpenGLInfo
 {
-	VAO_Container		VAOs[10];
+	VAO_Container		VAOs[32];
 	u32					NextAvailableIndex;
 
 	Camera				*Camera;
