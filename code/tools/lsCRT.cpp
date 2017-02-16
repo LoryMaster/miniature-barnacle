@@ -144,7 +144,17 @@ f64 ls_tan(f64 x)
 
 f64 ls_atan(f64 x)
 {
-	f64 z = (x - 1.0658e-16f) / 0.91373f;
+	if (x > 4.0f) { return (f64)(PI_32 / 2.0f); }
+	if (x < -4.0f) { return (f64)(-PI_32 / 2.0f); }
+	
+	//[-4;4]
+	f64 z = (x + 2.8866e-16f) / 2.3268f;
+
+	//[-pi/2, pi/2]
+	//f64 z = (x - 1.0658e-16f) / 0.91373f;
+
+	//[-6, 6]
+	//f64 z = (x + 2.4869e-16) / 4.0719;
 
 	f64 cube = z*z*z;
 	f64 fifth = cube*z*z;
@@ -157,8 +167,17 @@ f64 ls_atan(f64 x)
 	f64 eigth = fourth*fourth;
 	f64 tenth = eigth*square;
 
-	return -(4.9113e-17*tenth) + (0.0021578*ninth) + (3.3292e-16*eigth) - (0.020435*seventh) - (8.1985e-16*sixth)
-		+ (0.084557*fifth) + (7.7802e-16*fourth) - (0.23796*cube) - (2.0129e-16*square) + (0.91182*z) + (1.209e-16);
+	//[-pi/2; pi/2]
+	//return -(4.9113e-17*tenth) + (0.0021578*ninth) + (3.3292e-16*eigth) - (0.020435*seventh) - (8.1985e-16*sixth)
+	//	+ (0.084557*fifth) + (7.7802e-16*fourth) - (0.23796*cube) - (2.0129e-16*square) + (0.91182*z) + (1.209e-16);
+
+	//[-4;4]
+	return -(8.1227e-16*tenth) + (0.055954*ninth) + (6.0735e-15*eigth) - (0.44061*seventh) - (1.5317e-14*sixth)
+		+ (1.3053*fifth) + (1.489e-14*fourth) - (1.915*cube) - (4.731e-15*square) + (2.1475*z) + (7.9715e-18);
+
+	//[-6;6]
+	//return -(8.9202e-17*tenth) + (0.14909*ninth) - (1.4026e-16*eigth) - (1.13*seventh) + (2.155e-15*sixth)
+	//	+ (3.1309*fifth) - (4.1577e-15*fourth) - (4.0012*cube) + (2.4222e-15*square) + (3.1433*z) - (3.6934e-16);
 }
 
 f32 ls_sqrt(f32 x)
