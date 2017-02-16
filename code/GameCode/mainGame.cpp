@@ -196,8 +196,8 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		Mouse->xOffset = Mouse->MouseCenterX - Mouse->mouseX;
 		Mouse->yOffset = Mouse->MouseCenterY - Mouse->mouseY;
 
-		f32 xOff = (f32)Mouse->xOffset * sensitivity;
-		f32 yOff = (f32)Mouse->yOffset * sensitivity;
+		f32 xOff = (f32)Mouse->xOffset * 0.5f;//sensitivity;
+		f32 yOff = (f32)Mouse->yOffset * 2.0f;//sensitivity;
 
 		yawArg += (xOff / (Screen->Height / 2));
 		pitchArg += (yOff / (Screen->Width / 2));
@@ -319,7 +319,7 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	TransformManager *Transf = OpenGL->Transform;
 
 	SetStandardProjection(Transf);
-	/*fil(3)
+	fil(3)
 	{
 		SetView(Transf, *OpenGL->Camera);
 		SetModel(Transf, cube[i], scale, AngleX, AngleY);
@@ -327,16 +327,16 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		SetTransform(Transf);
 
 		RenderToScreen(OpenGL, Vertex, VAO_RECTANGLE);
-	}*/
+	}
 
-	SetView(Transf, *OpenGL->Camera);
-	SetModel(Transf, cube[0], scale, AngleX, AngleY);
+	//SetView(Transf, *OpenGL->Camera);
+	//SetModel(Transf, cube[0], scale, AngleX, AngleY);
 
-	RenderToScreen(OpenGL, Vertex, VAO_LIGHT);
+	//RenderToScreen(OpenGL, Vertex, VAO_LIGHT);
 
-	SetModel(Transf, cube[2], scale, AngleX, AngleY);
+	//SetModel(Transf, cube[2], scale, AngleX, AngleY);
 
-	RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
+	//RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
 
 	return;
 }

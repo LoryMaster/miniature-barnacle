@@ -16,7 +16,9 @@ s32 ls_abs(s32 x);
 
 f32 rad(f32 x);
 f64 ls_sine(f64 x);
+f64 ls_asin(f64 x);
 f64 ls_cos(f64 x);
+f64 ls_acos(f64 x);
 f64 ls_tan(f64 x);
 f64 ls_atan(f64 x);
 

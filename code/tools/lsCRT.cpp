@@ -54,6 +54,28 @@ f64 ls_sine(f64 x)
 		- (0.17589*fifth) - (3.0365e-15*fourth) + (1.0402*cube) + (1.6822e-16*square) - (1.8412*z) + (5.4606e-16);
 }
 
+f64 ls_asin(f64 x)
+{
+	if ((x < -1.0f) || (x > 1.0f))
+		return 0;
+
+	f64 z = (x + 7.2164e-17f) / 0.5817f;
+
+	f64 cube = z*z*z;
+	f64 fifth = cube*z*z;
+	f64 seventh = fifth*z*z;
+	f64 ninth = seventh*z*z;
+
+	f64 square = z*z;
+	f64 fourth = square*square;
+	f64 sixth = fourth*square;
+	f64 eigth = fourth*fourth;
+	f64 tenth = eigth*square;
+
+	return (1.6544e-15*tenth) + (0.024044*ninth) - (1.1741e-14*eigth) - (0.12358*seventh) + (2.9093e-14*sixth)
+		+ (0.22158*fifth) - (2.938e-14*fourth) - (0.10393*cube) + (1.0267e-14*square) + (0.60425*z) - 6.3772e-16;
+}
+
 f64 ls_cos(f64 x)
 {
 	b32 isNegative = (x > 0) ? FALSE : TRUE;
@@ -92,6 +114,29 @@ f64 ls_cos(f64 x)
 		- (3.0717e-15*fifth) - (0.47883*fourth) + (2.9256e-15*cube) + (1.6951*square) - (1.5395e-15*z) - 1;
 }
 
+f64 ls_acos(f64 x)
+{
+	if ((x < -1.0f) || (x > 1.0f))
+		return 0;
+
+	f64 z = (x + 7.2164e-17f) / 0.5817f;
+
+	f64 cube = z*z*z;
+	f64 fifth = cube*z*z;
+	f64 seventh = fifth*z*z;
+	f64 ninth = seventh*z*z;
+
+	f64 square = z*z;
+	f64 fourth = square*square;
+	f64 sixth = fourth*square;
+	f64 eigth = fourth*fourth;
+	f64 tenth = eigth*square;
+
+	return -(2.3277e-15*tenth) - (0.024044*ninth) + (1.7628e-14*eigth) + (0.12358*seventh) - (4.6935e-14*sixth)
+		- (0.22158*fifth) + (5.1126e-14*fourth) + (0.10393*cube) - (1.9655e-14*square) - (0.60425*z) + 1.5708;
+}
+
+
 f64 ls_tan(f64 x)
 {
 	return (ls_sine(x) / ls_cos(x));
@@ -99,25 +144,7 @@ f64 ls_tan(f64 x)
 
 f64 ls_atan(f64 x)
 {
-	b32 isNegative = (x > 0) ? FALSE : TRUE;
-	f64 mappedX = x;
-
-	if (isNegative)
-	{
-		while (mappedX < -(PI_32/2))
-		{
-			mappedX += PI_32;
-		}
-	}
-	else
-	{
-		while (mappedX > PI_32/2)
-		{
-			mappedX -= PI_32;
-		}
-	}
-
-	f64 z = (mappedX - 1.0658e-16f) / 0.91373f;
+	f64 z = (x - 1.0658e-16f) / 0.91373f;
 
 	f64 cube = z*z*z;
 	f64 fifth = cube*z*z;
