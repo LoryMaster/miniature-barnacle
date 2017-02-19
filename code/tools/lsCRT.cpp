@@ -1,4 +1,5 @@
 #include "tools\lsCRT.h"
+#include "tools\FunctionTables\FunctionTables.h"
 #include <immintrin.h>
 
 ////////////////////////////////////////////////////
@@ -8,6 +9,11 @@
 s32 ls_abs(s32 x)
 {
 	return (x < 0) ? x*(-1) : x;
+}
+
+f32 ls_abs(f32 x)
+{
+	return (x < 0.0f) ? x*(-1.0f) : x;
 }
 
 f32 rad(f32 x)
@@ -142,47 +148,62 @@ f64 ls_tan(f64 x)
 	return (ls_sine(x) / ls_cos(x));
 }
 
+//f64 ls_atan(f64 x)
+//{
+//	if (x > 4.0f) { return (f64)(PI_32 / 2.0f); }
+//	if (x < -4.0f) { return (f64)(-PI_32 / 2.0f); }
+//	
+//	//[-4;4]
+//	f64 z = (x + 2.8866e-16f) / 2.3268f;
+//
+//	//[-pi/2, pi/2]
+//	//f64 z = (x - 1.0658e-16f) / 0.91373f;
+//
+//	//[-6, 6]
+//	//f64 z = (x + 2.4869e-16) / 4.0719;
+//
+//	f64 cube = z*z*z;
+//	f64 fifth = cube*z*z;
+//	f64 seventh = fifth*z*z;
+//	f64 ninth = seventh*z*z;
+//
+//	f64 square = z*z;
+//	f64 fourth = square*square;
+//	f64 sixth = fourth*square;
+//	f64 eigth = fourth*fourth;
+//	f64 tenth = eigth*square;
+//
+//	//[-pi/2; pi/2]
+//	//return -(4.9113e-17*tenth) + (0.0021578*ninth) + (3.3292e-16*eigth) - (0.020435*seventh) - (8.1985e-16*sixth)
+//	//	+ (0.084557*fifth) + (7.7802e-16*fourth) - (0.23796*cube) - (2.0129e-16*square) + (0.91182*z) + (1.209e-16);
+//
+//	//[-4;4]
+//	return -(8.1227e-16*tenth) + (0.055954*ninth) + (6.0735e-15*eigth) - (0.44061*seventh) - (1.5317e-14*sixth)
+//		+ (1.3053*fifth) + (1.489e-14*fourth) - (1.915*cube) - (4.731e-15*square) + (2.1475*z) + (7.9715e-18);
+//
+//	//[-6;6]
+//	//return -(8.9202e-17*tenth) + (0.14909*ninth) - (1.4026e-16*eigth) - (1.13*seventh) + (2.155e-15*sixth)
+//	//	+ (3.1309*fifth) - (4.1577e-15*fourth) - (4.0012*cube) + (2.4222e-15*square) + (3.1433*z) - (3.6934e-16);
+//}
+
+//This feels even worse
 f64 ls_atan(f64 x)
 {
-	if (x > 4.0f) { return (f64)(PI_32 / 2.0f); }
-	if (x < -4.0f) { return (f64)(-PI_32 / 2.0f); }
-	
-	//[-4;4]
-	f64 z = (x + 2.8866e-16f) / 2.3268f;
+	b32 isNegative = x < 0.0f ? TRUE : FALSE;
+	if ((x > 10.00f) || (x < -10.00f))
+	{
+		if (isNegative) { return -arctan[1001]; }
+		else { return arctan[1001]; }
+	}
 
-	//[-pi/2, pi/2]
-	//f64 z = (x - 1.0658e-16f) / 0.91373f;
-
-	//[-6, 6]
-	//f64 z = (x + 2.4869e-16) / 4.0719;
-
-	f64 cube = z*z*z;
-	f64 fifth = cube*z*z;
-	f64 seventh = fifth*z*z;
-	f64 ninth = seventh*z*z;
-
-	f64 square = z*z;
-	f64 fourth = square*square;
-	f64 sixth = fourth*square;
-	f64 eigth = fourth*fourth;
-	f64 tenth = eigth*square;
-
-	//[-pi/2; pi/2]
-	//return -(4.9113e-17*tenth) + (0.0021578*ninth) + (3.3292e-16*eigth) - (0.020435*seventh) - (8.1985e-16*sixth)
-	//	+ (0.084557*fifth) + (7.7802e-16*fourth) - (0.23796*cube) - (2.0129e-16*square) + (0.91182*z) + (1.209e-16);
-
-	//[-4;4]
-	return -(8.1227e-16*tenth) + (0.055954*ninth) + (6.0735e-15*eigth) - (0.44061*seventh) - (1.5317e-14*sixth)
-		+ (1.3053*fifth) + (1.489e-14*fourth) - (1.915*cube) - (4.731e-15*square) + (2.1475*z) + (7.9715e-18);
-
-	//[-6;6]
-	//return -(8.9202e-17*tenth) + (0.14909*ninth) - (1.4026e-16*eigth) - (1.13*seventh) + (2.155e-15*sixth)
-	//	+ (3.1309*fifth) - (4.1577e-15*fourth) - (4.0012*cube) + (2.4222e-15*square) + (3.1433*z) - (3.6934e-16);
+	f32 xValue = ls_abs((f32)x)*100.0f;
+	if (isNegative) { return -arctan[(int)xValue]; }
+	else { return arctan[(int)xValue]; }
 }
 
 f32 ls_sqrt(f32 x)
 {
-	__m128 Result = _mm_set_ps(x, x, x, x);
+	__m128 Result = _mm_set_ps1(x);
 	Result = _mm_rsqrt_ps(Result);
 
 	return (1 / Result.m128_f32[0]);
@@ -338,8 +359,23 @@ char * ls_ftoa(f32 x)
 	char *Result = 0;
 
 	char *IntegerPart = ls_itoa((int)x);
-	s32 fractValue = s32(x * 1000000 - ((s32)x * 1000000));
-	char *FractPart = ls_itoa(fractValue);
+	char *FractPart = 0;
+	if (x < 1.0f)
+	{
+		s32 fractValue = s32((x + 1.0f) * 1000000);
+		FractPart = ls_itoa(fractValue);
+	}
+	else if (x >= 10.0f)
+	{
+		f32 fixedX = (x - (int)x) + 1.0f;
+		s32 fractValue = s32(fixedX * 1000000);
+		FractPart = ls_itoa(fractValue);
+	}
+	else
+	{
+		s32 fractValue = s32(x * 1000000);
+		FractPart = ls_itoa(fractValue);
+	}
 
 	BOOL hasSucceded = 0;
 
@@ -347,7 +383,7 @@ char * ls_ftoa(f32 x)
 	{
 		char *Negative = ls_concat("-", IntegerPart, 0);
 		char *Part1 = ls_concat(Negative, ".", 0);
-		Result = ls_concat(Part1, FractPart, 0);
+		Result = ls_concat(Part1, FractPart + 1, 0);
 
 		hasSucceded = HeapFree(HeapHandle, 0, Negative);
 		Assert(hasSucceded);
@@ -357,7 +393,7 @@ char * ls_ftoa(f32 x)
 	else
 	{
 		char *Part1 = ls_concat(IntegerPart, ".", 0);
-		Result = ls_concat(Part1, FractPart, 0);
+		Result = ls_concat(Part1, FractPart + 1, 0);
 
 		hasSucceded = HeapFree(HeapHandle, 0, Part1);
 		Assert(hasSucceded);

@@ -6,12 +6,14 @@
 // VECTOR DEFINITIONS
 ///////////////////////////////////////////
 
+_declspec(align(16))
 struct v2
 {
 	f32 x;
 	f32 y;
 };
 
+_declspec(align(16))
 union v3
 {
 	struct
@@ -28,6 +30,7 @@ union v3
 	};
 };
 
+_declspec(align(16))
 union v4
 {
 	struct
