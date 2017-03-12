@@ -114,15 +114,6 @@ struct Texture;
 struct Camera;
 struct TransformManager;
 
-struct VertexData
-{
-	GLfloat *vertices;
-	size_t verticesSize;
-
-	GLuint *indices;
-	size_t indicesSize;
-};
-
 struct VAO_Container
 {
 	GLuint		VAO;

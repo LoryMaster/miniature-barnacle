@@ -1,5 +1,5 @@
 //#include <Windows.h>
-#include "win32.h"
+#include "Platform\win32.h"
 #include "GameCode\mainGame.h"
 #include "tools\OpenGL\glCore.h"
 

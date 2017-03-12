@@ -185,8 +185,8 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	static f32 AngleY = 1.0f;
 	static f32 right = 0.0f;
 	static f32 top = 0.0f;
-	static f32 yawArg = 0.0f;
-	static f32 pitchArg = 0.0f;
+	static f32 yaw = 0.0f;
+	static f32 pitch = 0.0f;
 
 	ProcessWorldInput(Keyboard, &AngleX, &AngleY);
 
@@ -196,14 +196,18 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		Mouse->xOffset = Mouse->MouseCenterX - Mouse->mouseX;
 		Mouse->yOffset = Mouse->MouseCenterY - Mouse->mouseY;
 
-		f32 xOff = (f32)Mouse->xOffset * 0.5f;//sensitivity;
-		f32 yOff = (f32)Mouse->yOffset * 2.0f;//sensitivity;
+		f32 xOff = (f32)Mouse->xOffset * 0.08f;//sensitivity;
+		f32 yOff = (f32)Mouse->yOffset * 0.25;//sensitivity;
 
-		yawArg += (xOff / (Screen->Height / 2));
-		pitchArg += (yOff / (Screen->Width / 2));
+		f32 yawArg = (xOff / (Screen->Height / 2));
+		f32 pitchArg = (yOff / (Screen->Width / 2));
 
-		f32 yaw = (f32)ls_atan((f64)yawArg);
-		f32 pitch = (f32)ls_atan((f64)pitchArg);
+		yaw += (f32)ls_atan((f64)yawArg);
+		pitch += (f32)ls_atan((f64)pitchArg);
+
+		char buffer[512] = { };
+		ls_sprintf(buffer, "yawArg: %f, yaw: %f, pitchArg: %f, pitch: %f\n", yawArg, yaw, pitchArg, pitchArg);
+		OutputDebugStringA(buffer);
 
 		f32 MaxPitch = (89.0f*PI_32) / 180.0f;
 
@@ -308,13 +312,13 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	Vertex.vertices = vertices;
 	Vertex.verticesSize = sizeof(vertices);
 
-	char *Paths[2] = { {"W:/doubleMouse/resources/test.bmp"}, {"W:/doubleMouse/resources/facciaDiUaua.bmp"} };
+	char *Paths[2] = { {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/test.bmp"}, {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/facciaDiUaua.bmp"} };
 	TEXTURE_ENUM Names[2] = { TEX_TEST, TEX_TEST_2 };
 	Texture *Tex = InitTextureManager(Memory, Paths, Names, 2);
 
-	SetupVAO(Game, Memory, OpenGL, VAO_RECTANGLE, Vertex, Tex, "W:/doubleMouse/code/Shaders/RectangleVert.vs", "W:/doubleMouse/code/Shaders/RectangleFrag.frag");
-	SetupVAO(Game, Memory, OpenGL, VAO_LIGHT_CONTAINER, Vertex, Tex, "W:/doubleMouse/code/Shaders/LightContainerVert.vs", "W:/doubleMouse/code/Shaders/LightContainerFrag.frag");
-	SetupVAO(Game, Memory, OpenGL, VAO_LIGHT, Vertex, Tex, "W:/doubleMouse/code/Shaders/LightVert.vs", "W:/doubleMouse/code/Shaders/LightFrag.frag");
+	SetupVAO(Game, Memory, OpenGL, VAO_RECTANGLE, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleFrag.frag");
+	SetupVAO(Game, Memory, OpenGL, VAO_LIGHT_CONTAINER, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerFrag.frag");
+	SetupVAO(Game, Memory, OpenGL, VAO_LIGHT, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightFrag.frag");
 
 	TransformManager *Transf = OpenGL->Transform;
 

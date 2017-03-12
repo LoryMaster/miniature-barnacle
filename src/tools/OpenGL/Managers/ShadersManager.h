@@ -1,6 +1,6 @@
 #pragma once
 
-#include "win32.h"
+#include "Platform\win32.h"
 #include "tools\OpenGL\glCore.h"
 
 struct Shader

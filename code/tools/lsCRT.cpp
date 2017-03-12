@@ -192,8 +192,8 @@ f64 ls_atan(f64 x)
 	b32 isNegative = x < 0.0f ? TRUE : FALSE;
 	if ((x > 10.00f) || (x < -10.00f))
 	{
-		if (isNegative) { return -arctan[1001]; }
-		else { return arctan[1001]; }
+		if (isNegative) { return -arctan[1000]; }
+		else { return arctan[1000]; }
 	}
 
 	f32 xValue = ls_abs((f32)x)*100.0f;

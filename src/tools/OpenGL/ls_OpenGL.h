@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lsWindows.h"
+#include "Platform\lsWindows.h"
 
 #if !defined(_GDI32_)
 #define WINGDIAPI DECLSPEC_IMPORT
@@ -38,3 +38,12 @@ typedef float GLclampf;
 typedef double GLdouble;
 typedef double GLclampd;
 typedef void GLvoid;
+
+struct VertexData
+{
+	GLfloat *vertices;
+	size_t verticesSize;
+
+	GLuint *indices;
+	size_t indicesSize;
+};

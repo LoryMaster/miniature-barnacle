@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lsWindows.h"
+#include "..\Platform\lsWindows.h"
 #include <stdarg.h>
 
 #define fil(value) for(int i = 0; i < value; i++)
