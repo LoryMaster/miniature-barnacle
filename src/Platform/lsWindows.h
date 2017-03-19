@@ -9,11 +9,14 @@ extern "C" {
 #define CALLBACK				__stdcall
 #define WINAPI					__stdcall
 #define WINAPIV					__cdecl
+#define LSCDECL					__cdecl
 #define APIPRIVATE				__stdcall
 #define PASCAL					__stdcall
 #define DECLSPEC_ALLOCATOR		__declspec(allocator)
+#define LSIMPORT				__declspec(dllimport)
 #define CONST					const
 #define APIENTRY				WINAPI
+#define WSAAPI                  PASCAL
 #define WINVER					0x0500 /* version 5.0 */
 #define _WIN32_WINNT			0x0A00
 #define _WIN32_WINDOWS			0x0410 // I don't even know if these versions defines are right...
@@ -29,8 +32,40 @@ extern "C" {
 #define TRUE                1
 #endif
 
+#define MAKEWORD(a, b)      ((WORD)(((BYTE)(((DWORD_PTR)(a)) & 0xff)) | ((WORD)((BYTE)(((DWORD_PTR)(b)) & 0xff))) << 8))
+#define MAKELONG(a, b)      ((LONG)(((WORD)(((DWORD_PTR)(a)) & 0xffff)) | ((DWORD)((WORD)(((DWORD_PTR)(b)) & 0xffff))) << 16))
+#define LOWORD(l)           ((WORD)(((DWORD_PTR)(l)) & 0xffff))
+#define HIWORD(l)           ((WORD)((((DWORD_PTR)(l)) >> 16) & 0xffff))
+#define LOBYTE(w)           ((BYTE)(((DWORD_PTR)(w)) & 0xff))
+#define HIBYTE(w)           ((BYTE)((((DWORD_PTR)(w)) >> 8) & 0xff))
+
 #define DUMMYSTRUCTNAME
 #define DUMMYUNIONNAME
+
+
+#pragma region ErrorMacros
+
+#define ERROR_INVALID_HANDLE             6L
+#define ERROR_NOT_ENOUGH_MEMORY          8L    
+
+#define ERROR_INVALID_PARAMETER          87L
+
+#define WAIT_TIMEOUT                     258L
+
+#define ERROR_OPERATION_ABORTED          995L
+#define ERROR_IO_INCOMPLETE              996L
+#define ERROR_IO_PENDING                 997L
+#define ERROR_NOACCESS                   998L
+
+#define STATUS_WAIT_0                    ((DWORD   )0x00000000L) 
+#define STATUS_USER_APC                  ((DWORD   )0x000000C0L)
+#define INFINITE						 0xFFFFFFFF
+
+#define MAXIMUM_WAIT_OBJECTS			 64
+#define WAIT_FAILED						 ((DWORD)0xFFFFFFFF)
+#define WAIT_OBJECT_0					 ((STATUS_WAIT_0 ) + 0 )
+#define WAIT_IO_COMPLETION               STATUS_USER_APC
+#pragma endregion
 
 //
 // Memory Management
@@ -52,9 +87,10 @@ extern "C" {
 #else
 #define DECLSPEC_IMPORT
 #endif
-#define WINUSERAPI DECLSPEC_IMPORT
-#define WINABLEAPI DECLSPEC_IMPORT
-#define WINBASEAPI DECLSPEC_IMPORT
+#define WINUSERAPI				DECLSPEC_IMPORT
+#define WINABLEAPI				DECLSPEC_IMPORT
+#define WINBASEAPI				DECLSPEC_IMPORT
+#define WINSOCK_API_LINKAGE		DECLSPEC_IMPORT
 
 #if !defined(_GDI32_)
 #define WINGDIAPI DECLSPEC_IMPORT
@@ -333,6 +369,7 @@ extern "C" {
 
 	typedef s32				   b32;
 
+#pragma region FixedWithIntegralDefines
 // These macros must exactly match those in the Windows SDK's intsafe.h.
 #define INT8_MIN         (-127i8 - 1)
 #define INT16_MIN        (-32767i16 - 1)
@@ -510,6 +547,7 @@ typedef CONST void			*LPCVOID;
 typedef UINT_PTR            WPARAM;
 typedef LONG_PTR            LPARAM;
 typedef LONG_PTR            LRESULT;
+typedef ULONG_PTR			DWORD_PTR, *PDWORD_PTR;
 
 typedef int                 INT;
 typedef unsigned int        UINT;
@@ -633,9 +671,9 @@ typedef unsigned __int64 size_t;
 typedef __int64          ptrdiff_t;
 typedef __int64          intptr_t;
 #else
-typedef unsigned int     size_t;
-typedef int              ptrdiff_t;
-typedef int              intptr_t;
+typedef unsigned int    size_t;
+typedef int             ptrdiff_t;
+typedef int             intptr_t;
 #endif
 
 //
@@ -655,6 +693,31 @@ typedef int (WINAPI *NEARPROC)();
 typedef int (WINAPI *PROC)();
 #endif  // _WIN64
 
+//
+//	Network Typedefs
+//
+
+typedef UINT_PTR        SOCKET;
+typedef unsigned char   u_char;
+typedef unsigned short  u_short;
+typedef unsigned int    u_int;
+typedef unsigned long   u_long;
+typedef u_long			SERVICETYPE;
+
+#pragma region ServiceTypeDefines
+
+#define SERVICETYPE_NOTRAFFIC               0x00000000  /* No data in this direction */
+#define SERVICETYPE_BESTEFFORT              0x00000001  /* Best Effort */
+#define SERVICETYPE_CONTROLLEDLOAD          0x00000002  /* Controlled Load */
+#define SERVICETYPE_GUARANTEED              0x00000003  /* Guaranteed */
+#define SERVICETYPE_NETWORK_UNAVAILABLE     0x00000004  /* Used to notify change to user */
+#define SERVICETYPE_GENERAL_INFORMATION     0x00000005  /* corresponds to "General Parameters" defined by IntServ */
+#define SERVICETYPE_NOCHANGE                0x00000006  /* used to indicate that the flow spec contains no change from any previous one */
+#define SERVICETYPE_NONCONFORMING           0x00000009  /* Non-Conforming Traffic */
+#define SERVICETYPE_NETWORK_CONTROL         0x0000000A  /* Network Control traffic */
+#define SERVICETYPE_QUALITATIVE             0x0000000D  /* Qualitative applications */ 
+
+#pragma endregion
 
 //
 // Handle to an Object
@@ -758,6 +821,8 @@ typedef struct tagPIXELFORMATDESCRIPTOR
 	DWORD dwDamageMask;
 } PIXELFORMATDESCRIPTOR, *PPIXELFORMATDESCRIPTOR, *LPPIXELFORMATDESCRIPTOR;
 
+#pragma region PixelDefines
+
 //	pixel types
 #define PFD_TYPE_RGBA        0
 #define PFD_TYPE_COLORINDEX  1
@@ -789,6 +854,8 @@ typedef struct tagPIXELFORMATDESCRIPTOR
 #define PFD_DEPTH_DONTCARE          0x20000000
 #define PFD_DOUBLEBUFFER_DONTCARE   0x40000000
 #define PFD_STEREO_DONTCARE         0x80000000
+
+#pragma endregion
 
 //
 // Message structure
@@ -895,9 +962,535 @@ typedef struct _OVERLAPPED {
 	HANDLE  hEvent;
 } OVERLAPPED, *LPOVERLAPPED;
 
+typedef struct _OVERLAPPED *    LPWSAOVERLAPPED;
+
+typedef struct _iobuf
+{
+	void* _Placeholder;
+} FILE;
+
+//
+//	Network Structures
+//
+
+#pragma region WSA_Errors
+
+/*
+* All Windows Sockets error constants are biased by WSABASEERR from
+* the "normal"
+*/
+#define WSABASEERR              10000
+
+//Windows Sockets definitions of regular Microsoft C error constants
+#define WSAEINTR                (WSABASEERR+4)
+#define WSAEBADF                (WSABASEERR+9)
+#define WSAEACCES               (WSABASEERR+13)
+#define WSAEFAULT               (WSABASEERR+14)
+#define WSAEINVAL               (WSABASEERR+22)
+#define WSAEMFILE               (WSABASEERR+24)
+
+//Windows Sockets definitions of regular Berkeley error constants
+#define WSAEWOULDBLOCK          (WSABASEERR+35)
+#define WSAEINPROGRESS          (WSABASEERR+36)
+#define WSAEALREADY             (WSABASEERR+37)
+#define WSAENOTSOCK             (WSABASEERR+38)
+#define WSAEDESTADDRREQ         (WSABASEERR+39)
+#define WSAEMSGSIZE             (WSABASEERR+40)
+#define WSAEPROTOTYPE           (WSABASEERR+41)
+#define WSAENOPROTOOPT          (WSABASEERR+42)
+#define WSAEPROTONOSUPPORT      (WSABASEERR+43)
+#define WSAESOCKTNOSUPPORT      (WSABASEERR+44)
+#define WSAEOPNOTSUPP           (WSABASEERR+45)
+#define WSAEPFNOSUPPORT         (WSABASEERR+46)
+#define WSAEAFNOSUPPORT         (WSABASEERR+47)
+#define WSAEADDRINUSE           (WSABASEERR+48)
+#define WSAEADDRNOTAVAIL        (WSABASEERR+49)
+#define WSAENETDOWN             (WSABASEERR+50)
+#define WSAENETUNREACH          (WSABASEERR+51)
+#define WSAENETRESET            (WSABASEERR+52)
+#define WSAECONNABORTED         (WSABASEERR+53)
+#define WSAECONNRESET           (WSABASEERR+54)
+#define WSAENOBUFS              (WSABASEERR+55)
+#define WSAEISCONN              (WSABASEERR+56)
+#define WSAENOTCONN             (WSABASEERR+57)
+#define WSAESHUTDOWN            (WSABASEERR+58)
+#define WSAETOOMANYREFS         (WSABASEERR+59)
+#define WSAETIMEDOUT            (WSABASEERR+60)
+#define WSAECONNREFUSED         (WSABASEERR+61)
+#define WSAELOOP                (WSABASEERR+62)
+#define WSAENAMETOOLONG         (WSABASEERR+63)
+#define WSAEHOSTDOWN            (WSABASEERR+64)
+#define WSAEHOSTUNREACH         (WSABASEERR+65)
+#define WSAENOTEMPTY            (WSABASEERR+66)
+#define WSAEPROCLIM             (WSABASEERR+67)
+#define WSAEUSERS               (WSABASEERR+68)
+#define WSAEDQUOT               (WSABASEERR+69)
+#define WSAESTALE               (WSABASEERR+70)
+#define WSAEREMOTE              (WSABASEERR+71)
+
+//Extended Windows Sockets error constant definitions
+#define WSASYSNOTREADY          (WSABASEERR+91)
+#define WSAVERNOTSUPPORTED      (WSABASEERR+92)
+#define WSANOTINITIALISED       (WSABASEERR+93)
+#define WSAEDISCON              (WSABASEERR+101)
+#define WSAENOMORE              (WSABASEERR+102)
+#define WSAECANCELLED           (WSABASEERR+103)
+#define WSAEINVALIDPROCTABLE    (WSABASEERR+104)
+#define WSAEINVALIDPROVIDER     (WSABASEERR+105)
+#define WSAEPROVIDERFAILEDINIT  (WSABASEERR+106)
+#define WSASYSCALLFAILURE       (WSABASEERR+107)
+#define WSASERVICE_NOT_FOUND    (WSABASEERR+108)
+#define WSATYPE_NOT_FOUND       (WSABASEERR+109)
+#define WSA_E_NO_MORE           (WSABASEERR+110)
+#define WSA_E_CANCELLED         (WSABASEERR+111)
+#define WSAEREFUSED             (WSABASEERR+112)
+
+//Authoritative Answer: Host not found
+#define WSAHOST_NOT_FOUND       (WSABASEERR+1001)
+
+//Non-Authoritative: Host not found, or SERVERFAIL
+#define WSATRY_AGAIN            (WSABASEERR+1002)
+
+//Non-recoverable errors, FORMERR, REFUSED, NOTIMP
+#define WSANO_RECOVERY          (WSABASEERR+1003)
+
+//Valid name, no data record of requested type
+#define WSANO_DATA              (WSABASEERR+1004)
+
+//Compatibility macros.
+#define h_errno         WSAGetLastError()
+#define HOST_NOT_FOUND          WSAHOST_NOT_FOUND
+#define TRY_AGAIN               WSATRY_AGAIN
+#define NO_RECOVERY             WSANO_RECOVERY
+#define NO_DATA                 WSANO_DATA
+/* no address, look for MX record */
+#define WSANO_ADDRESS           WSANO_DATA
+#define NO_ADDRESS              WSANO_ADDRESS
+
+#pragma endregion
+
+#pragma region WinSock2Extensions
+#define WSAAPI                  PASCAL
+#define WSAEVENT                HANDLE
+#define LPWSAEVENT              LPHANDLE
+#define WSAOVERLAPPED           OVERLAPPED
+typedef struct _OVERLAPPED *    LPWSAOVERLAPPED;
+
+#define WSA_IO_PENDING          (ERROR_IO_PENDING)
+#define WSA_IO_INCOMPLETE       (ERROR_IO_INCOMPLETE)
+#define WSA_INVALID_HANDLE      (ERROR_INVALID_HANDLE)
+#define WSA_INVALID_PARAMETER   (ERROR_INVALID_PARAMETER)
+#define WSA_NOT_ENOUGH_MEMORY   (ERROR_NOT_ENOUGH_MEMORY)
+#define WSA_OPERATION_ABORTED   (ERROR_OPERATION_ABORTED)
+
+#define WSA_INVALID_EVENT       ((WSAEVENT)NULL)
+#define WSA_MAXIMUM_WAIT_EVENTS (MAXIMUM_WAIT_OBJECTS)
+#define WSA_WAIT_FAILED         (WAIT_FAILED)
+#define WSA_WAIT_EVENT_0        (WAIT_OBJECT_0)
+#define WSA_WAIT_IO_COMPLETION  (WAIT_IO_COMPLETION)
+#define WSA_WAIT_TIMEOUT        (WAIT_TIMEOUT)
+#define WSA_INFINITE            (INFINITE)
+#pragma endregion
+
+#pragma region AddressFamily
+
+#define AF_UNSPEC       0               // unspecified
+#define AF_UNIX         1               // local to host (pipes, portals)
+#define AF_INET         2               // internetwork: UDP, TCP, etc.
+#define AF_IMPLINK      3               // arpanet imp addresses
+#define AF_PUP          4               // pup protocols: e.g. BSP
+#define AF_CHAOS        5               // mit CHAOS protocols
+#define AF_NS           6               // XEROX NS protocols
+#define AF_IPX          AF_NS           // IPX protocols: IPX, SPX, etc.
+#define AF_ISO          7               // ISO protocols
+#define AF_OSI          AF_ISO          // OSI is ISO
+#define AF_ECMA         8               // european computer manufacturers
+#define AF_DATAKIT      9               // datakit protocols
+#define AF_CCITT        10              // CCITT protocols, X.25 etc
+#define AF_SNA          11              // IBM SNA
+#define AF_DECnet       12              // DECnet
+#define AF_DLI          13              // Direct data link interface
+#define AF_LAT          14              // LAT
+#define AF_HYLINK       15              // NSC Hyperchannel
+#define AF_APPLETALK    16              // AppleTalk
+#define AF_NETBIOS      17              // NetBios-style addresses
+#define AF_VOICEVIEW    18              // VoiceView
+#define AF_FIREFOX      19              // Protocols from Firefox
+#define AF_UNKNOWN1     20              // Somebody is using this!
+#define AF_BAN          21              // Banyan
+#define AF_ATM          22              // Native ATM Services
+#define AF_INET6        23              // Internetwork Version 6
+#define AF_CLUSTER      24              // Microsoft Wolfpack
+#define AF_12844        25              // IEEE 1284.4 WG AF
+#define AF_IRDA         26              // IrDA
+#define AF_NETDES       28              // Network Designers OSI & gateway
+#define AF_TCNPROCESS   29
+#define AF_TCNMESSAGE   30
+#define AF_ICLFXBM      31
+#define AF_BTH          32              // Bluetooth RFCOMM/L2CAP protocols
+#define AF_LINK         33
+#define AF_HYPERV       34
+#define AF_MAX          35
+
+#pragma endregion
+
+#pragma region SocketDefines
+
+//Socket Types
+#define SOCK_STREAM				1
+#define SOCK_DGRAM				2
+#define SOCK_RAW				3
+#define SOCK_RDM				4
+#define SOCK_SEQPACKET			5
+
+//Define a level for socket I/O controls in the same numbering space as IPPROTO_TCP, IPPROTO_IP, etc.
+#define SOL_SOCKET				0xffff
+
+//Define socket-level options.
+#define SO_DEBUG				0x0001      // turn on debugging info recording
+#define SO_ACCEPTCONN			0x0002      // socket has had listen()
+#define SO_REUSEADDR			0x0004      // allow local address reuse
+#define SO_KEEPALIVE			0x0008      // keep connections alive
+#define SO_DONTROUTE			0x0010      // just use interface addresses
+#define SO_BROADCAST			0x0020      // permit sending of broadcast msgs
+#define SO_USELOOPBACK			0x0040      // bypass hardware when possible
+#define SO_LINGER				0x0080      // linger on close if data present
+#define SO_OOBINLINE			0x0100      // leave received OOB data in line
+
+#define SO_DONTLINGER			(int)(~SO_LINGER)
+#define SO_EXCLUSIVEADDRUSE		((int)(~SO_REUSEADDR))          // disallow local address reuse
+
+#define SO_SNDBUF				0x1001      // send buffer size
+#define SO_RCVBUF				0x1002      // receive buffer size
+#define SO_SNDLOWAT				0x1003      // send low-water mark
+#define SO_RCVLOWAT				0x1004      // receive low-water mark
+#define SO_SNDTIMEO				0x1005      // send timeout
+#define SO_RCVTIMEO				0x1006      // receive timeout
+#define SO_ERROR				0x1007      // get error status and clear
+#define SO_TYPE					0x1008      // get socket type
+#define SO_BSP_STATE			0x1009      // get socket 5-tuple state
+#define SO_GROUP_ID				0x2001      // ID of a socket group
+#define SO_GROUP_PRIORITY		0x2002		// the relative priority within a group
+#define SO_MAX_MSG_SIZE			0x2003      // maximum message size
+
+#define SO_CONDITIONAL_ACCEPT	0x3002		// enable true conditional accept:
+
+// connection is not ack-ed to the other side until conditional function returns CF_ACCEPT
+#define SO_PAUSE_ACCEPT			0x3003      // pause accepting new connections
+#define SO_COMPARTMENT_ID		0x3004		// get/set the compartment for a socket
+#define SO_RANDOMIZE_PORT		0x3005		// randomize assignment of wildcard ports
+#define SO_PORT_SCALABILITY		0x3006		// enable port scalability
+#define SO_REUSE_UNICASTPORT	0x3007		// defer ephemeral port allocation for outbound connections
+#define SO_REUSE_MULTICASTPORT	0x3008		// enable port reuse and disable unicast reception.
+
+#pragma endregion
+
+#pragma region IPPortsDefines
+
+//Port/socket numbers: network standard functions
+#define IPPORT_TCPMUX           1
+#define IPPORT_ECHO             7
+#define IPPORT_DISCARD          9
+#define IPPORT_SYSTAT           11
+#define IPPORT_DAYTIME          13
+#define IPPORT_NETSTAT          15
+#define IPPORT_QOTD             17
+#define IPPORT_MSP              18
+#define IPPORT_CHARGEN          19
+#define IPPORT_FTP_DATA         20
+#define IPPORT_FTP              21
+#define IPPORT_TELNET           23
+#define IPPORT_SMTP             25
+#define IPPORT_TIMESERVER       37
+#define IPPORT_NAMESERVER       42
+#define IPPORT_WHOIS            43
+#define IPPORT_MTP              57
+
+//Port/socket numbers: host specific functions
+#define IPPORT_TFTP             69
+#define IPPORT_RJE              77
+#define IPPORT_FINGER           79
+#define IPPORT_TTYLINK          87
+#define IPPORT_SUPDUP           95
+
+//UNIX TCP sockets
+#define IPPORT_POP3             110
+#define IPPORT_NTP              123
+#define IPPORT_EPMAP            135
+#define IPPORT_NETBIOS_NS       137
+#define IPPORT_NETBIOS_DGM      138
+#define IPPORT_NETBIOS_SSN      139
+#define IPPORT_IMAP             143
+#define IPPORT_SNMP             161
+#define IPPORT_SNMP_TRAP        162
+#define IPPORT_IMAP3            220
+#define IPPORT_LDAP             389
+#define IPPORT_HTTPS            443
+#define IPPORT_MICROSOFT_DS     445
+#define IPPORT_EXECSERVER       512
+#define IPPORT_LOGINSERVER      513
+#define IPPORT_CMDSERVER        514
+#define IPPORT_EFSSERVER        520
+
+//UNIX UDP sockets
+#define IPPORT_BIFFUDP          512
+#define IPPORT_WHOSERVER        513
+#define IPPORT_ROUTESERVER      520
+/* 520+1 also used */
+
+//Ports < IPPORT_RESERVED are reserved for privileged processes (e.g. root).
+#define IPPORT_RESERVED         1024
+#define IPPORT_REGISTERED_MIN   IPPORT_RESERVED
+#define IPPORT_REGISTERED_MAX   0xbfff
+#define IPPORT_DYNAMIC_MIN      0xc000
+#define IPPORT_DYNAMIC_MAX      0xffff
+
+#pragma endregion
+
+#pragma region NetworkMessageDefines
+
+#define MSG_OOB				0x1             /* process out-of-band data */
+#define MSG_PEEK			0x2             /* peek at incoming message */
+#define MSG_DONTROUTE		0x4             /* send without using routing tables */
+#define MSG_WAITALL			0x8             /* do not complete until packet is completely filled */
+#define MSG_PUSH_IMMEDIATE	0x20         /* Do not delay receive request completion if data is available */
+#define MSG_PARTIAL			0x8000          /* partial send or recv for message xport */
+
+//WinSock 2 extension -- new flags for WSASend(), WSASendTo(), WSARecv() and WSARecvFrom()
+#define MSG_INTERRUPT		0x10            /* send/recv in the interrupt context */
+#define MSG_MAXIOVLEN		16
+
+#pragma endregion
+
+#define INADDR_ANY              (ULONG)0x00000000
+#define INADDR_LOOPBACK         0x7f000001
+#define INADDR_BROADCAST        (ULONG)0xffffffff
+#define INADDR_NONE             0xffffffff
+
+#define INET_ADDRSTRLEN			22
+#define INET6_ADDRSTRLEN		65
+
+#define ADDR_ANY                INADDR_ANY
+
+#define WSADESCRIPTION_LEN      256
+#define WSASYS_STATUS_LEN       128
+
+//Level number for (get/set)sockopt() to apply to socket itself
+#define SOL_SOCKET				0xffff          //Options for socket level
+#define SOMAXCONN				0x7fffffff		//Maximum queue length specifiable by listen
+#define SOMAXCONN_HINT(b)		(-(b))
+#define INVALID_SOCKET			(SOCKET)(~0)
+#define SOCKET_ERROR            (-1)
+
+//N.B. required for backwards compatability to support 0 = IP for the level argument to get/setsockopt.
+#define IPPROTO_IP              0
+
+//Protocols.  The IPv6 defines are specified in RFC 2292.
+typedef enum {
+	IPPROTO_HOPOPTS = 0,	// IPv6 Hop-by-Hop options
+	IPPROTO_ICMP = 1,
+	IPPROTO_IGMP = 2,
+	IPPROTO_GGP = 3,
+	IPPROTO_IPV4 = 4,
+	IPPROTO_ST = 5,
+	IPPROTO_TCP = 6,
+	IPPROTO_CBT = 7,
+	IPPROTO_EGP = 8,
+	IPPROTO_IGP = 9,
+	IPPROTO_PUP = 12,
+	IPPROTO_UDP = 17,
+	IPPROTO_IDP = 22,
+	IPPROTO_RDP = 27,
+	IPPROTO_IPV6 = 41,		// IPv6 header
+	IPPROTO_ROUTING = 43,	// IPv6 Routing header
+	IPPROTO_FRAGMENT = 44,	// IPv6 fragmentation header
+	IPPROTO_ESP = 50,		// encapsulating security payload
+	IPPROTO_AH = 51,		// authentication header
+	IPPROTO_ICMPV6 = 58,	// ICMPv6
+	IPPROTO_NONE = 59,		// IPv6 no next header
+	IPPROTO_DSTOPTS = 60,	// IPv6 Destination options
+	IPPROTO_ND = 77,
+	IPPROTO_ICLFXBM = 78,
+	IPPROTO_PIM = 103,
+	IPPROTO_PGM = 113,
+	IPPROTO_L2TP = 115,
+	IPPROTO_SCTP = 132,
+	IPPROTO_RAW = 255,
+	IPPROTO_MAX = 256,
+	//
+	//  These are reserved for internal use by Windows.
+	//
+	IPPROTO_RESERVED_RAW = 257,
+	IPPROTO_RESERVED_IPSEC = 258,
+	IPPROTO_RESERVED_IPSECOFFLOAD = 259,
+	IPPROTO_RESERVED_WNV = 260,
+	IPPROTO_RESERVED_MAX = 261
+} IPPROTO, *PIPROTO;
+
+typedef struct WSAData {
+	WORD                    wVersion;
+	WORD                    wHighVersion;
+#ifdef _WIN64
+	unsigned short          iMaxSockets;
+	unsigned short          iMaxUdpDg;
+	char					*lpVendorInfo;
+	char                    szDescription[WSADESCRIPTION_LEN + 1];
+	char                    szSystemStatus[WSASYS_STATUS_LEN + 1];
+#else
+	char                    szDescription[WSADESCRIPTION_LEN + 1];
+	char                    szSystemStatus[WSASYS_STATUS_LEN + 1];
+	unsigned short          iMaxSockets;
+	unsigned short          iMaxUdpDg;
+	char *					lpVendorInfo;
+#endif
+} WSADATA, *LPWSADATA;
+
+#define FD_SETSIZE	64
+
+typedef struct fd_set {
+	u_int	fd_count;				/* how many are SET? */
+	SOCKET  fd_array[FD_SETSIZE];   /* an array of SOCKETs */
+} fd_set;
+
+struct timeval {
+	long    tv_sec;					/* seconds */
+	long    tv_usec;				/* and microseconds */
+};
+
+//Scope ID definition
+typedef enum {
+	ScopeLevelInterface = 1,
+	ScopeLevelLink = 2,
+	ScopeLevelSubnet = 3,
+	ScopeLevelAdmin = 4,
+	ScopeLevelSite = 5,
+	ScopeLevelOrganization = 8,
+	ScopeLevelGlobal = 14,
+	ScopeLevelCount = 16
+} SCOPE_LEVEL;
+
+typedef struct {
+	union {
+		struct {
+			u_long Zone : 28;
+			u_long Level : 4;
+		};
+		u_long Value;
+	};
+} SCOPE_ID, *PSCOPE_ID;
+
+//IPv4 Internet address. This is an 'on-wire' format structure. (TERRIBLE STRUCTURE! JUST USE s_addr)
+typedef struct in_addr {
+	union {
+		struct { u_char s_b1, s_b2, s_b3, s_b4; } S_un_b;
+		struct { u_short s_w1, s_w2; } S_un_w;
+		u_long S_addr;
+	} S_un;
+#define s_addr  S_un.S_addr			/* can be used for most tcp & ip code */
+#define s_host  S_un.S_un_b.s_b2    // host on imp
+#define s_net   S_un.S_un_b.s_b1    // network
+#define s_imp   S_un.S_un_w.s_w2    // imp
+#define s_impno S_un.S_un_b.s_b4    // imp #
+#define s_lh    S_un.S_un_b.s_b3    // logical host
+} IN_ADDR, *PIN_ADDR, *LPIN_ADDR;
+
+//IPv6 Internet address (RFC 2553). This is an 'on-wire' format structure.
+typedef struct in6_addr {
+	union {
+		u_char       Byte[16];
+		u_short      Word[8];
+	} u;
+
+#define s6_addr8                u.Byte
+#define s6_addr16               u.Word
+
+} IN6_ADDR, *PIN6_ADDR, *LPIN6_ADDR;
+
+typedef struct sockaddr {
+	u_short sa_family;				// Address family, AF_xxx
+	char	sa_data[14];			// Up to 14 bytes of direct address(protocol address)
+} SOCKADDR, *PSOCKADDR, *LPSOCKADDR;
+
+typedef struct sockaddr_in {
+	
+	u_short sin_family;
+	u_short	sin_port;
+	IN_ADDR sin_addr;
+	char	sin_zero[8];
+} SOCKADDR_IN, *PSOCKADDR_IN;
+
+typedef struct sockaddr_in6 {
+	u_short sin6_family;			// AF_INET6.
+	u_short sin6_port;				// Transport level port number.
+	u_long  sin6_flowinfo;			// IPv6 flow information.
+	IN6_ADDR sin6_addr;				// IPv6 address.
+	union {
+		u_long		sin6_scope_id;	// Set of interfaces for a scope.
+		SCOPE_ID	sin6_scope_struct;
+	};
+} SOCKADDR_IN6_LH, *PSOCKADDR_IN6_LH, *LPSOCKADDR_IN6_LH;
+
+#define _SS_MAXSIZE 128                 // Maximum size
+#define _SS_ALIGNSIZE (sizeof(__int64)) // Desired alignment
+#define _SS_PAD1SIZE (_SS_ALIGNSIZE - sizeof(u_short))
+#define _SS_PAD2SIZE (_SS_MAXSIZE - (sizeof(u_short) + _SS_PAD1SIZE + _SS_ALIGNSIZE))
+typedef struct sockaddr_storage {
+	u_short ss_family;					// address family
+
+	char	__ss_pad1[_SS_PAD1SIZE];	// 6 byte pad, this is to make
+										// implementation specific pad up to
+										// alignment field that follows explicit
+										// in the data structure
+	__int64 __ss_align;					// Field to force desired structure
+	char	__ss_pad2[_SS_PAD2SIZE];	// 112 byte pad to achieve desired size;
+										// _SS_MAXSIZE value minus size of
+										// ss_family, __ss_pad1, and
+										// __ss_align fields is 112
+} SOCKADDR_STORAGE_LH, *PSOCKADDR_STORAGE_LH, *LPSOCKADDR_STORAGE_LH;
+
+typedef struct _WSABUF {
+	u_long	len;					/* the length of the buffer */
+	char	*buf;					/* the pointer to the buffer */
+} WSABUF, *LPWSABUF;
+
+typedef struct _flowspec
+{
+	u_long       TokenRate;              /* In Bytes/sec */
+	u_long       TokenBucketSize;        /* In Bytes */
+	u_long       PeakBandwidth;          /* In Bytes/sec */
+	u_long       Latency;                /* In microseconds */
+	u_long       DelayVariation;         /* In microseconds */
+	SERVICETYPE  ServiceType;
+	u_long       MaxSduSize;             /* In Bytes */
+	u_long       MinimumPolicedSize;     /* In Bytes */
+
+} FLOWSPEC, *PFLOWSPEC, *LPFLOWSPEC;
+
+typedef struct _QualityOfService
+{
+	FLOWSPEC      SendingFlowspec;       /* the flow spec for data sending */
+	FLOWSPEC      ReceivingFlowspec;     /* the flow spec for data receiving */
+	WSABUF        ProviderSpecific;      /* additional provider specific stuff */
+} QOS, *LPQOS;
+
+typedef struct addrinfo
+{
+	int                 ai_flags;       // AI_PASSIVE, AI_CANONNAME, AI_NUMERICHOST
+	int                 ai_family;      // PF_xxx
+	int                 ai_socktype;    // SOCK_xxx
+	int                 ai_protocol;    // 0 or IPPROTO_xxx for IPv4 and IPv6
+	size_t              ai_addrlen;     // Length of ai_addr
+	char *              ai_canonname;   // Canonical name for nodename
+	struct sockaddr *   ai_addr;        // Binary address
+	struct addrinfo *   ai_next;        // Next structure in linked list
+} ADDRINFOA, *PADDRINFOA;
+
 //
 // Window Styles
 //
+
+#pragma region WindowStylesDefines
+
 #define WS_OVERLAPPED       0x00000000L
 #define WS_POPUP            0x80000000L
 #define WS_CHILD            0x40000000L
@@ -925,6 +1518,8 @@ typedef struct _OVERLAPPED {
 #define WS_ICONIC           WS_MINIMIZE
 #define WS_SIZEBOX          WS_THICKFRAME
 #define WS_TILEDWINDOW      WS_OVERLAPPEDWINDOW
+
+#pragma endregion
 
 //
 // Common Window Styles
@@ -958,14 +1553,58 @@ WINBASEAPI	BOOL		WINAPI		FileTimeToSystemTime(CONST FILETIME * lpFileTime, LPSYS
 WINBASEAPI	BOOL		WINAPI		QueryPerformanceCounter(LARGE_INTEGER * lpPerformanceCount);
 WINBASEAPI	BOOL		WINAPI		QueryPerformanceFrequency(LARGE_INTEGER * lpFrequency);
 
-
 WINBASEAPI	VOID		WINAPI		Sleep(DWORD dwMilliseconds);
 WINBASEAPI	DWORD		WINAPI		SleepEx(DWORD dwMilliseconds, BOOL bAlertable);
 
 WINBASEAPI	VOID		WINAPI		OutputDebugStringA(LPCSTR lpOutputString);
 WINBASEAPI	VOID		WINAPI		DebugBreak(VOID);
+WINBASEAPI	DWORD		WINAPI		GetLastError(VOID);
 
-WINBASEAPI /*_Check_return_	_Post_equals_last_error_*/			DWORD	WINAPI	GetLastError(VOID);
+#pragma region ConsoleDefines
+
+#define STD_INPUT_HANDLE    ((DWORD)-10)
+#define STD_OUTPUT_HANDLE   ((DWORD)-11)
+#define STD_ERROR_HANDLE    ((DWORD)-12)
+#define _O_RDONLY      0x0000  // open for reading only
+#define _O_WRONLY      0x0001  // open for writing only
+#define _O_RDWR        0x0002  // open for reading and writing
+#define _O_APPEND      0x0008  // writes done at eof
+#define _O_CREAT       0x0100  // create and open file
+#define _O_TRUNC       0x0200  // open and truncate
+#define _O_EXCL        0x0400  // open only if file doesn't already exist
+
+// O_TEXT files have <cr><lf> sequences translated to <lf> on read()'s and <lf> sequences translated to <cr><lf> on write()'s
+#define _O_TEXT        0x4000  // file mode is text (translated)
+#define _O_BINARY      0x8000  // file mode is binary (untranslated)
+#define _O_WTEXT       0x10000 // file mode is UTF16 (translated)
+#define _O_U16TEXT     0x20000 // file mode is UTF16 no BOM (translated)
+#define _O_U8TEXT      0x40000 // file mode is UTF8  no BOM (translated)
+#define _O_NOINHERIT   0x0080  // child process doesn't inherit file
+#define _O_TEMPORARY   0x0040  // temporary file bit (file is deleted when last handle is closed)
+#define _O_SHORT_LIVED 0x1000  // temporary storage file, try not to flush
+#define _O_OBTAIN_DIR  0x2000  // get information about a directory
+#define _O_SEQUENTIAL  0x0020  // file access is primarily sequential
+#define _O_RANDOM      0x0010  // file access is primarily random
+
+#define _O_RAW _O_BINARY // macro to translate the C 2.0 name used to force binary mode for files
+
+#define EOF    (-1)
+#define _IOFBF 0x0000
+#define _IOLBF 0x0040
+#define _IONBF 0x0004
+
+#define stdin  (__acrt_iob_func(0))
+#define stdout (__acrt_iob_func(1))
+#define stderr (__acrt_iob_func(2))
+
+#pragma endregion
+
+WINBASEAPI	BOOL		WINAPI		AllocConsole(VOID);
+WINBASEAPI	HANDLE		WINAPI		GetStdHandle(DWORD nStdHandle);
+LSIMPORT	int			LSCDECL		_open_osfhandle(intptr_t OSFileHandle, int Flags);
+LSIMPORT	FILE*		LSCDECL		_fdopen(int FileHandle, char const* Mode);
+LSIMPORT	int			LSCDECL		setvbuf(FILE* Stream, char* Buffer, int Mode, size_t Size);
+LSIMPORT	FILE*		LSCDECL		__acrt_iob_func(unsigned);
 
 //
 // File I/O
@@ -1716,6 +2355,40 @@ WINGDIAPI	int			WINAPI		ChoosePixelFormat(HDC hdc, CONST PIXELFORMATDESCRIPTOR *
 WINGDIAPI	BOOL		WINAPI		SetPixelFormat(HDC hdc, int format, CONST PIXELFORMATDESCRIPTOR * ppfd);
 WINGDIAPI	BOOL		WINAPI		SwapBuffers(HDC);
 
+//
+// Windows Socket Functions (Network Programming)
+//
+
+typedef	void	(CALLBACK * LPWSAOVERLAPPED_COMPLETION_ROUTINE)(DWORD dwError,DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags);
+
+WINSOCK_API_LINKAGE		int		WSAAPI		WSAStartup(WORD wVersionRequested, LPWSADATA lpWSAData);
+WINSOCK_API_LINKAGE		int		WSAAPI		WSACleanup(void);
+WINSOCK_API_LINKAGE		int		WSAAPI		WSAGetLastError(void);
+WINSOCK_API_LINKAGE		int		WSAAPI		WSASend(SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesSent, DWORD dwFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
+WINSOCK_API_LINKAGE		int		WSAAPI		WSARecv(SOCKET s, LPWSABUF lpBuffers, DWORD dwBufferCount, LPDWORD lpNumberOfBytesRecvd, LPDWORD lpFlags, LPWSAOVERLAPPED lpOverlapped, LPWSAOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine);
+WINSOCK_API_LINKAGE		int		WSAAPI		WSAConnect(SOCKET s, const struct sockaddr *name, int namelen, LPWSABUF lpCallerData, LPWSABUF lpCalleeData, LPQOS lpSQOS, LPQOS lpGQOS);
+
+WINSOCK_API_LINKAGE		SOCKET	WSAAPI		socket(int af, int type, int protocol);
+WINSOCK_API_LINKAGE		int		WSAAPI		select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, const struct timeval *timeout);
+WINSOCK_API_LINKAGE		SOCKET	WSAAPI		accept(SOCKET s, struct sockaddr *addr, int *addrlen);
+WINSOCK_API_LINKAGE		int		WSAAPI		bind(SOCKET s, const struct sockaddr *name, int namelen);
+WINSOCK_API_LINKAGE		int		WSAAPI		closesocket(SOCKET s);
+WINSOCK_API_LINKAGE		int		WSAAPI		connect(SOCKET s, const struct sockaddr *name, int namelen);
+WINSOCK_API_LINKAGE		int		WSAAPI		send(SOCKET s, const char *buf, int len, int flags);
+WINSOCK_API_LINKAGE		int		WSAAPI		recv(SOCKET s, char *buf, int len, int flags);
+WINSOCK_API_LINKAGE		int		WSAAPI		shutdown(SOCKET s, int how);
+
+WINSOCK_API_LINKAGE		u_long	WSAAPI		htonl(u_long hostlong);
+WINSOCK_API_LINKAGE		u_short	WSAAPI		htons(u_short hostshort);
+WINSOCK_API_LINKAGE		u_long	WSAAPI		ntohl(u_long netlong);
+WINSOCK_API_LINKAGE		u_short	WSAAPI		ntohs(u_short netshort);
+
+WINSOCK_API_LINKAGE		int		WSAAPI		getaddrinfo(PCSTR pNodeName, PCSTR pServiceName, const ADDRINFOA *pHints, ADDRINFOA *ppResult);
+WINSOCK_API_LINKAGE		int		WSAAPI		inet_pton(int Family, PCSTR pszAddrString, PVOID pAddrBuf);
+						PCSTR	WSAAPI		inet_ntop(int Family, const VOID *pAddr, PSTR pStringBuf, size_t StringBufSize);
+WINSOCK_API_LINKAGE		u_long	WSAAPI		inet_addr(const char *cp);
+
+WINSOCK_API_LINKAGE		int		WSAAPI		listen(SOCKET s, int backlog);
 }
 
 #ifdef _DEBUG

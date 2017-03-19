@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Platform\win32.h"
+#include "tools\lsCRT.h"
 
 ///////////////////////////////////////////
 // VECTOR DEFINITIONS

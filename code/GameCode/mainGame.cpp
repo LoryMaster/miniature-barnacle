@@ -1,5 +1,6 @@
 #include "GameCode\mainGame.h"
 #include "tools\OpenGL\glCore.h"
+#include "tools\lsCRT.h"
 
 void LoadTexture(GameInfo *Game, MemoryArena *Memory, const char *Path)
 {
@@ -197,7 +198,7 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		Mouse->yOffset = Mouse->MouseCenterY - Mouse->mouseY;
 
 		f32 xOff = (f32)Mouse->xOffset * 0.08f;//sensitivity;
-		f32 yOff = (f32)Mouse->yOffset * 0.25;//sensitivity;
+		f32 yOff = (f32)Mouse->yOffset * 0.25f;//sensitivity;
 
 		f32 yawArg = (xOff / (Screen->Height / 2));
 		f32 pitchArg = (yOff / (Screen->Width / 2));
@@ -205,11 +206,11 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		yaw += (f32)ls_atan((f64)yawArg);
 		pitch += (f32)ls_atan((f64)pitchArg);
 
-		char buffer[512] = { };
+	/*	char buffer[512] = { };
 		ls_sprintf(buffer, "yawArg: %f, yaw: %f, pitchArg: %f, pitch: %f\n", yawArg, yaw, pitchArg, pitchArg);
-		OutputDebugStringA(buffer);
+		OutputDebugStringA(buffer);*/
 
-		f32 MaxPitch = (89.0f*PI_32) / 180.0f;
+		f32 MaxPitch = (89.0f*PI_32) / 180.0f; //@TODO: Probably broken!?
 
 		if (pitch > MaxPitch) { pitch = MaxPitch; }
 		if (pitch < -MaxPitch) { pitch = -MaxPitch; }

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "..\lsCRT.h"
 #include "glCoreARB.h"
 #include "wglExt.h"
+#include "tools\lsCRT.h"
 
 #define internal static
 

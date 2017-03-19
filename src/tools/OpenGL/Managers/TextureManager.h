@@ -3,6 +3,7 @@
 #include "Platform\win32.h"
 #include "GameCode\mainGame.h"
 #include "tools\OpenGL\glCore.h"
+#include "tools\lsCRT.h"
 
 enum TEXTURE_ENUM
 {

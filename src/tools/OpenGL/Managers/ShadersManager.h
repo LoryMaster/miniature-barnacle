@@ -2,6 +2,7 @@
 
 #include "Platform\win32.h"
 #include "tools\OpenGL\glCore.h"
+#include "tools\lsCRT.h"
 
 struct Shader
 {

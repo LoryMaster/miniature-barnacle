@@ -1,9 +1,9 @@
-//#include <Windows.h>
 #include "Platform\win32.h"
 #include "GameCode\mainGame.h"
 #include "tools\OpenGL\glCore.h"
 
-//#include <math.h> //Used to fill the arctan table
+#define LS_CRT_IMPLEMENTATION
+#include "tools\lsCRT.h"
 
 internal VOID Win32_SetFnPointers()
 {

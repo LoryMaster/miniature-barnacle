@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lsWindows.h"
+#include "Platform\lsWindows.h"
 
 u64 table[] = {
 	631583045,	278580489,	646104984,	561743323,	370977635,

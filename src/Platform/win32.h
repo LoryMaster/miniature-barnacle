@@ -1,7 +1,5 @@
 #pragma once
-
 #include "lsWindows.h"
-#include "tools\lsCRT.h"
 
 #define internal	static
 #define global		static
