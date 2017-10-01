@@ -241,61 +241,64 @@ extern "C" {
 
 #pragma endregion
 
+#if 0
 //
 // SAL Shit I really don't understand... in the end everything is just turned off.
 //
 
-//#define _SAL_nop_impl_ 
-//#define _Null_terminated_impl_
-//#define _NullNull_terminated_impl_
-//#define _Check_return_impl_
-//#define _Post_satisfies_impl_(expr)
-//#define _Ret1_impl_(p1)
-//#define _Post1_impl_(p1)
-//#define _Group_impl_(annos)
-//#define _GrouP_impl_(annos)
-//#define _Post_impl_
-//#define _Success_impl_(expr)
-//#define _Post_                         _Post_impl_
-//#define _Pre_maybenull_
-//#define _Post_ptr_invalid_
-//
-//#define _Group_(annos)                 _Group_impl_(annos _SAL_nop_impl_)
-//#define _GrouP_(annos)                 _GrouP_impl_(annos _SAL_nop_impl_)
-//
-//#define _SA_annotes0(n)
-//#define _SA_annotes1(n,pp1)
-//#define _SA_annotes2(n,pp1,pp2)
-//#define _SA_annotes3(n,pp1,pp2,pp3)
-//
-//#if defined(BUILD_WINDOWS) && !_USE_ATTRIBUTES_FOR_SAL
-//#define _SAL1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1") _GrouP_(annotes _SAL_nop_impl_)
-//#define _SAL1_1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.1") _GrouP_(annotes _SAL_nop_impl_)
-//#define _SAL1_2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.2") _GrouP_(annotes _SAL_nop_impl_)
-//#define _SAL2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
-//
-//#ifndef _SAL_L_Source_
-//// Some annotations aren't officially SAL2 yet.
-//#define _SAL_L_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
-//#endif
-//#else
-//#define _SAL1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1") _Group_(annotes _SAL_nop_impl_)
-//#define _SAL1_1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.1") _Group_(annotes _SAL_nop_impl_)
-//#define _SAL1_2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.2") _Group_(annotes _SAL_nop_impl_)
-//#define _SAL2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _Group_(annotes _SAL_nop_impl_)
-//#define _SAL_L_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
-//#endif
-//
-//#define _Post_satisfies_(cond)			  _SAL2_Source_(_Post_satisfies_, (cond), _Post_satisfies_impl_(cond))
-//#define _Null_terminated_                 _SAL2_Source_(_Null_terminated_, (), _Null_terminated_impl_)
-//#define _NullNull_terminated_             _SAL2_Source_(_NullNull_terminated_, (), _NullNull_terminated_impl_)
-//#define _Check_return_					  _SAL2_Source_(_Check_return_, (), _Check_return_impl_)
-//#define _Post_equals_last_error_		  _SAL2_Source_(_Post_equals_last_error_, (),  _Post_satisfies_(_Curr_ != 0))
-//#define _Ret_maybenull_                   _SAL2_Source_(_Ret_maybenull_, (), _Ret1_impl_(__maybenull_impl))
-//#define _Post_writable_byte_size_(size)   _SAL2_Source_(_Post_writable_byte_size_, (size), _Post1_impl_(__bytecap_impl(size)))
-//#define __drv_freesMem(kind)			  _SAL_L_Source_(__drv_freesMem, (kind), _Post_ _SA_annotes1(SAL_NeedsRelease,__no))
-//#define _Frees_ptr_opt_					 _SAL_L_Source_(_Frees_ptr_opt_, (),  _Pre_maybenull_ _Post_ptr_invalid_ __drv_freesMem(Mem))
-//#define _Success_(expr)                  _SAL2_Source_(_Success_, (expr), _Success_impl_(expr))
+#define _SAL_nop_impl_ 
+#define _Null_terminated_impl_
+#define _NullNull_terminated_impl_
+#define _Check_return_impl_
+#define _Post_satisfies_impl_(expr)
+#define _Ret1_impl_(p1)
+#define _Post1_impl_(p1)
+#define _Group_impl_(annos)
+#define _GrouP_impl_(annos)
+#define _Post_impl_
+#define _Success_impl_(expr)
+#define _Post_                         _Post_impl_
+#define _Pre_maybenull_
+#define _Post_ptr_invalid_
+
+#define _Group_(annos)                 _Group_impl_(annos _SAL_nop_impl_)
+#define _GrouP_(annos)                 _GrouP_impl_(annos _SAL_nop_impl_)
+
+#define _SA_annotes0(n)
+#define _SA_annotes1(n,pp1)
+#define _SA_annotes2(n,pp1,pp2)
+#define _SA_annotes3(n,pp1,pp2,pp3)
+
+#if defined(BUILD_WINDOWS) && !_USE_ATTRIBUTES_FOR_SAL
+#define _SAL1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1") _GrouP_(annotes _SAL_nop_impl_)
+#define _SAL1_1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.1") _GrouP_(annotes _SAL_nop_impl_)
+#define _SAL1_2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.2") _GrouP_(annotes _SAL_nop_impl_)
+#define _SAL2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
+
+#ifndef _SAL_L_Source_
+// Some annotations aren't officially SAL2 yet.
+#define _SAL_L_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
+#endif
+#else
+#define _SAL1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1") _Group_(annotes _SAL_nop_impl_)
+#define _SAL1_1_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.1") _Group_(annotes _SAL_nop_impl_)
+#define _SAL1_2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "1.2") _Group_(annotes _SAL_nop_impl_)
+#define _SAL2_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _Group_(annotes _SAL_nop_impl_)
+#define _SAL_L_Source_(Name, args, annotes) _SA_annotes3(SAL_name, #Name, "", "2") _GrouP_(annotes _SAL_nop_impl_)
+#endif
+
+#define _Post_satisfies_(cond)			  _SAL2_Source_(_Post_satisfies_, (cond), _Post_satisfies_impl_(cond))
+#define _Null_terminated_                 _SAL2_Source_(_Null_terminated_, (), _Null_terminated_impl_)
+#define _NullNull_terminated_             _SAL2_Source_(_NullNull_terminated_, (), _NullNull_terminated_impl_)
+#define _Check_return_					  _SAL2_Source_(_Check_return_, (), _Check_return_impl_)
+#define _Post_equals_last_error_		  _SAL2_Source_(_Post_equals_last_error_, (),  _Post_satisfies_(_Curr_ != 0))
+#define _Ret_maybenull_                   _SAL2_Source_(_Ret_maybenull_, (), _Ret1_impl_(__maybenull_impl))
+#define _Post_writable_byte_size_(size)   _SAL2_Source_(_Post_writable_byte_size_, (size), _Post1_impl_(__bytecap_impl(size)))
+#define __drv_freesMem(kind)			  _SAL_L_Source_(__drv_freesMem, (kind), _Post_ _SA_annotes1(SAL_NeedsRelease,__no))
+#define _Frees_ptr_opt_					 _SAL_L_Source_(_Frees_ptr_opt_, (),  _Pre_maybenull_ _Post_ptr_invalid_ __drv_freesMem(Mem))
+#define _Success_(expr)                  _SAL2_Source_(_Success_, (expr), _Success_impl_(expr))
+
+#endif
 
 //
 // Aligment
@@ -350,6 +353,8 @@ extern "C" {
 
 	typedef long long          intmax_t;
 	typedef unsigned long long uintmax_t;
+
+#pragma endregion
 
 //
 // My own most used fixed-width types
@@ -856,6 +861,32 @@ typedef struct tagPIXELFORMATDESCRIPTOR
 #define PFD_STEREO_DONTCARE         0x80000000
 
 #pragma endregion
+
+typedef struct tagRGBQUAD {
+	BYTE    rgbBlue;
+	BYTE    rgbGreen;
+	BYTE    rgbRed;
+	BYTE    rgbReserved;
+} RGBQUAD;
+
+typedef struct tagBITMAPINFOHEADER {
+	DWORD      biSize;
+	LONG       biWidth;
+	LONG       biHeight;
+	WORD       biPlanes;
+	WORD       biBitCount;
+	DWORD      biCompression;
+	DWORD      biSizeImage;
+	LONG       biXPelsPerMeter;
+	LONG       biYPelsPerMeter;
+	DWORD      biClrUsed;
+	DWORD      biClrImportant;
+} BITMAPINFOHEADER, *LPBITMAPINFOHEADER, *PBITMAPINFOHEADER;
+
+typedef struct tagBITMAPINFO {
+	BITMAPINFOHEADER    bmiHeader;
+	RGBQUAD             bmiColors[1];
+} BITMAPINFO, *LPBITMAPINFO, *PBITMAPINFO;
 
 //
 // Message structure
@@ -1677,9 +1708,9 @@ WINBASEAPI	DWORD		WINAPI		GetFileType(HANDLE hFile);
 
 #pragma endregion
 
-WINBASEAPI	/*_Ret_maybenull_	_Post_writable_byte_size_(dwBytes)*/	DECLSPEC_ALLOCATOR	LPVOID	WINAPI	HeapAlloc(HANDLE hHeap, DWORD dwFlags, SIZE_T dwBytes);
-WINBASEAPI	/*_Success_(return != FALSE)*/	BOOL	WINAPI	HeapFree(HANDLE hHeap, DWORD dwFlags, /*__drv_freesMem(Mem) _Frees_ptr_opt_*/ LPVOID lpMem);
-WINBASEAPI /*_Ret_maybenull_	_Post_writable_byte_size_(dwSize)*/	LPVOID	WINAPI	VirtualAlloc(LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect);
+WINBASEAPI	DECLSPEC_ALLOCATOR	LPVOID	WINAPI	HeapAlloc(HANDLE hHeap, DWORD dwFlags, SIZE_T dwBytes);
+WINBASEAPI	BOOL	WINAPI	HeapFree(HANDLE hHeap, DWORD dwFlags, /*__drv_freesMem(Mem) _Frees_ptr_opt_*/ LPVOID lpMem);
+WINBASEAPI 	LPVOID	WINAPI	VirtualAlloc(LPVOID lpAddress, SIZE_T dwSize, DWORD flAllocationType, DWORD flProtect);
 
 WINBASEAPI	HANDLE	WINAPI	GetProcessHeap(VOID);
 
@@ -2353,6 +2384,8 @@ WINUSERAPI	ATOM		WINAPI		RegisterClassW(const WNDCLASSW *lpWndClass);
 WINUSERAPI	HDC			WINAPI		GetDC(HWND hWnd);
 WINGDIAPI	int			WINAPI		ChoosePixelFormat(HDC hdc, CONST PIXELFORMATDESCRIPTOR *ppfd);
 WINGDIAPI	BOOL		WINAPI		SetPixelFormat(HDC hdc, int format, CONST PIXELFORMATDESCRIPTOR * ppfd);
+WINGDIAPI	int			WINAPI		StretchDIBits(HDC hdc, int xDest, int yDest, int DestWidth, int DestHeight, int xSrc, int ySrc, int SrcWidth, 
+													int SrcHeight, CONST VOID *lpBits, CONST BITMAPINFO *lpbmi, UINT iUsage, DWORD rop);
 WINGDIAPI	BOOL		WINAPI		SwapBuffers(HDC);
 
 //

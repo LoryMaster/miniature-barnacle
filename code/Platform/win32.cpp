@@ -400,64 +400,6 @@ internal LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM wParam, L
 	return Result;
 }
 
-#if 0
-void WriteAtanTable()
-{
-	DWORD Error = 0;
-	HANDLE FileHandle = 0;
-	DWORD BytesWritten = 0;
-	HANDLE HeapHandle = GetProcessHeap();
-	if ((FileHandle = CreateFileA("C:/Users/Lorenzo/Desktop/FunctionTable.h", GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL)) == INVALID_HANDLE_VALUE)
-	{
-		Error = GetLastError();
-		LogErrori("When creating a file handle got error: ", Error);
-	}
-
-	char *beginning = "f32 arctan[1001] = {\n\r";
-	char *end = "};\n\r\0";
-
-	if (WriteFile(FileHandle, beginning, ls_len(beginning), &BytesWritten, NULL) == FALSE)
-	{
-		Error = GetLastError();
-		LogErrori("Error when writing into file: ", Error);
-	}
-
-	f32 argVal = 0.0f;
-	char *buffer = 0;
-	char *numberBuffer = 0;
-	char endNumber[4] = { 'f', ',', ' ', 0 };
-	char endLine[5] = { 'f', ',', '\n', '\r', 0 };
-	int i = 1;
-	for (argVal = 0.00f; argVal < 10.01f; argVal += 0.01f)
-	{
-		f32 atanValue = atanf(argVal);
-		numberBuffer = ls_ftoa(atanValue);
-		if(i % 8  == 0) { buffer = ls_concat(numberBuffer, endLine, 0); }
-		else { buffer = ls_concat(numberBuffer, endNumber, 0); }
-		if (WriteFile(FileHandle, buffer, ls_len(buffer), &BytesWritten, NULL) == FALSE)
-		{
-			Error = GetLastError();
-			LogErrori("Error when writing into file: ", Error);
-		}
-		HeapFree(HeapHandle, 0, buffer);
-		HeapFree(HeapHandle, 0, numberBuffer);
-
-		i++;
-	}
-
-	if (WriteFile(FileHandle, end, ls_len(end), &BytesWritten, NULL) == FALSE)
-	{
-		Error = GetLastError();
-		LogErrori("Error when writing into file: ", Error);
-	}
-
-	if (CloseHandle(FileHandle) == FALSE)
-	{
-		OutputDebugStringA("Couldn't close file handle at the end of Win32_ReadEntireFile function.\n");
-	}
-}
-#endif
-
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	//Win32_SetFnPointers();
