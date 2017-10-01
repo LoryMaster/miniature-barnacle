@@ -20,6 +20,15 @@ struct Bitmap
 	u32 size;
 };
 
+struct VertexData
+{
+	GLfloat *vertices;
+	size_t verticesSize;
+
+	GLuint *indices;
+	size_t indicesSize;
+};
+
 struct GameInfo
 {
 	GAME_MODE GameMode;
@@ -27,10 +36,14 @@ struct GameInfo
 	Bitmap bitmaps[10];
 	u32 NextBitmapIndex;
 };
+
 void LoadTexture(GameInfo *Game, MemoryArena *Memory, const char *Path);
 
 extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen, OpenGLInfo *OpenGL, InputManager *Input);
 
-//Test Functions
-internal void RenderTriangle(GameInfo *Game, ScreenInfo *Screen, OpenGLInfo *OpenGL, MemoryArena *Memory);
-internal void RenderRectangle(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen, OpenGLInfo *OpenGL, f32 right, f32 top, f32 AngleX, f32 AngleY);
+internal void ProcessWorldInput(KeyboardManager *Keyboard, f32 *AngleX, f32 *AngleY);
+internal void ProcessCameraInput(KeyboardManager *Keyboard, Camera *Camera, v3 cameraFront);
+internal void InitCamera(OpenGLInfo *OpenGL, MemoryArena *Memory);
+internal void InitTransform(OpenGLInfo *OpenGL, MemoryArena *Memory);
+internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Type);
+internal void SetupVAO(GameInfo *Game, MemoryArena *Memory, OpenGLInfo *OpenGL, VAO_Type Type, VertexData Vertex, Texture *Tex, char *VSPath, char *FSPath);

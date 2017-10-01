@@ -15,7 +15,7 @@ void SetTransform(TransformManager *Manager)
 
 void SetModel(TransformManager *Manager, v4 translate, v4 scale, f32 AngleX, f32 AngleY)
 {
-	Manager->ModelMatrix = Translate(translate) * Scale(scale) * RotateX(AngleX) * RotateY(AngleY);
+	Manager->ModelMatrix = Translate(translate) * Scale4(scale) * RotateX(AngleX) * RotateY(AngleY);
 }
 
 void SetModel(TransformManager *Manager, Mat4 TranslationM, Mat4 ScaleM, Mat4 RotM)

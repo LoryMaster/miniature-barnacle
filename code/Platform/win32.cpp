@@ -1,6 +1,9 @@
 #include "Platform\win32.h"
-#include "GameCode\mainGame.h"
 #include "tools\OpenGL\glCore.h"
+#include "GameCode\mainGame.h"
+
+#define LS_MATH_IMPLEMENTATION
+#include "tools\Maths\Maths.h"
 
 #define LS_CRT_IMPLEMENTATION
 #include "tools\lsCRT.h"

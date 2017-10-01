@@ -1,5 +1,5 @@
-#include "GameCode\mainGame.h"
 #include "tools\OpenGL\glCore.h"
+#include "GameCode\mainGame.h"
 #include "tools\lsCRT.h"
 
 void LoadTexture(GameInfo *Game, MemoryArena *Memory, const char *Path)
@@ -55,7 +55,7 @@ internal void ProcessCameraInput(KeyboardManager *Keyboard, Camera *Camera, v3 c
 
 	if (Keyboard->RightArrow == TRUE)
 	{
-		Camera->pos = Camera->pos + V4((Normalize(cameraFront ^ cameraUp) * Camera->speed));
+		Camera->pos = Camera->pos + V4((NormalizeV3(cameraFront ^ cameraUp) * Camera->speed));
 	}
 	if (Keyboard->UpArrow == TRUE)
 	{
@@ -63,7 +63,7 @@ internal void ProcessCameraInput(KeyboardManager *Keyboard, Camera *Camera, v3 c
 	}
 	if (Keyboard->LeftArrow == TRUE)
 	{
-		Camera->pos = Camera->pos - V4((Normalize(cameraFront ^ cameraUp) * Camera->speed));
+		Camera->pos = Camera->pos - V4((NormalizeV3(cameraFront ^ cameraUp) * Camera->speed));
 	}
 	if (Keyboard->DownArrow == TRUE)
 	{
@@ -112,18 +112,32 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 		glUniform1i(glGetUniformLocation(Program, texName), i);
 	}
 
-	if (Type == VAO_LIGHT)
+	if (Type == VAO_LIGHT_CONTAINER)
 	{
 		glUniform3f(glGetUniformLocation(Program, "objectColor"), 1.0f, 0.5f, 0.31f);
 		glUniform3f(glGetUniformLocation(Program, "lightColor"), 1.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(Program, "lightPos"), -1.5f, -2.2f, -2.5f);
 	}
 
 
 	glBindVertexArray(VAO);
-	GLuint TransformLoc = glGetUniformLocation(Program, "transform");
-	glUniformMatrix4fv(TransformLoc, 1, GL_TRUE, (GLfloat *)OpenGL->Transform->Transform.values);
 
-	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)(Vertex.verticesSize / (5*sizeof(GLfloat))));
+	if (Type == VAO_LIGHT_CONTAINER)
+	{
+		GLuint TransformLoc = glGetUniformLocation(Program, "transform");
+		glUniformMatrix4fv(TransformLoc, 1, GL_TRUE, (GLfloat *)OpenGL->Transform->Transform.values);
+
+		GLuint ModelLoc = glGetUniformLocation(Program, "model");
+		glUniformMatrix4fv(ModelLoc, 1, GL_TRUE, (GLfloat *)OpenGL->Transform->ModelMatrix.values);
+	}
+	
+	else if (Type == VAO_LIGHT)
+	{
+		GLuint TransformLoc = glGetUniformLocation(Program, "transform");
+		glUniformMatrix4fv(TransformLoc, 1, GL_TRUE, (GLfloat *)OpenGL->Transform->Transform.values);
+	}
+
+	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)(Vertex.verticesSize / (8*sizeof(GLfloat))));
 	glBindVertexArray(0);
 }
 
@@ -145,13 +159,13 @@ internal void SetupVAO(GameInfo *Game, MemoryArena *Memory, OpenGLInfo *OpenGL, 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Vertex.indicesSize, Vertex.indices, GL_STATIC_DRAW);
 
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 		glEnableVertexAttribArray(0);
 
-		//glVertexAttribPointer(1, 2/*3*/, GL_FLOAT, GL_FALSE, /*8*/ 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-		//glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
 
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 		glEnableVertexAttribArray(2);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -223,7 +237,7 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		if ((yawArg && pitchArg) != 0)
 		{
 			cameraFront = { -(f32)ls_sine(yaw) * (f32)ls_cos(pitch) , (f32)ls_sine(pitch), -(f32)ls_cos(yaw) * (f32)ls_cos(pitch) };
-			cameraFront = Normalize(cameraFront);
+			cameraFront = NormalizeV3(cameraFront);
 		}
 
 		ProcessCameraInput(Keyboard, OpenGL->Camera, cameraFront);
@@ -232,49 +246,93 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	}
 
 
-	//TEMPORARY VERTEX DATA
+	//TEMPORARY VERTEX DATA (V3 pos, V3 normals, V2 uvs)
 	GLfloat vertices[] = {
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f,
+							   
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f,
+							    
+		-0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+							   
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
+							   
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 1.0f,
+							   
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f
+	};
 
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+	GLfloat vertices2[] = {
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 0.0f, -1.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,
 
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
 
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,
 
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
 
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,
+
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f
 	};
 
 	GLuint indices[] =
@@ -324,24 +382,31 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	TransformManager *Transf = OpenGL->Transform;
 
 	SetStandardProjection(Transf);
-	fil(3)
+	/*fil(3)
 	{
 		SetView(Transf, *OpenGL->Camera);
 		SetModel(Transf, cube[i], scale, AngleX, AngleY);
 
 		SetTransform(Transf);
 
-		RenderToScreen(OpenGL, Vertex, VAO_RECTANGLE);
-	}
+		RenderToScreen(OpenGL, Vertex, VAO_LIGHT);
+	}*/
 
-	//SetView(Transf, *OpenGL->Camera);
-	//SetModel(Transf, cube[0], scale, AngleX, AngleY);
+	SetView(Transf, *OpenGL->Camera);
+	SetModel(Transf, cube[2], scale, AngleX, AngleY);
 
-	//RenderToScreen(OpenGL, Vertex, VAO_LIGHT);
+	SetTransform(Transf);
+	RenderToScreen(OpenGL, Vertex, VAO_LIGHT);
 
-	//SetModel(Transf, cube[2], scale, AngleX, AngleY);
+	SetModel(Transf, cube[0], scale, AngleX, AngleY);
+	SetTransform(Transf);
 
-	//RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
+	RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
+
+	SetModel(Transf, cube[1], scale, AngleX, AngleY);
+	SetTransform(Transf);
+
+	RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
 
 	return;
 }

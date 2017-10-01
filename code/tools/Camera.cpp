@@ -11,7 +11,7 @@ Camera *createCamera(MemoryArena *Memory, v4 pos, v4 target)
 
 	v4 UnnormalizedCameraZ4 = (pos - target);
 	v3 UnnormalizedCameraZ3 = { UnnormalizedCameraZ4.x, UnnormalizedCameraZ4.y, UnnormalizedCameraZ4.z };
-	Result->zDir = Normalize(UnnormalizedCameraZ3);
+	Result->zDir = NormalizeV3(UnnormalizedCameraZ3);
 
 	v3 WorldY = { 0.0f, 1.0f, 0.0f };
 	Result->xDir = WorldY ^ Result->zDir;
@@ -49,7 +49,7 @@ Mat4 LookAt(Camera Camera)
 {
 	v4 UnnormalizedCameraZ4 = (Camera.pos - Camera.target);
 	v3 UnnormalizedCameraZ3 = { UnnormalizedCameraZ4.x, UnnormalizedCameraZ4.y, UnnormalizedCameraZ4.z };
-	v3 Z3 = Normalize(UnnormalizedCameraZ3);
+	v3 Z3 = NormalizeV3(UnnormalizedCameraZ3);
 
 	v3 WorldY = { 0.0f, 1.0f, 0.0f };
 	v3 X3 = WorldY ^ Z3;
