@@ -1,7 +1,5 @@
 #pragma once
-
 #include "lsWindows.h"
-#include "tools\lsCRT.h"
 
 #define internal	static
 #define global		static
@@ -103,6 +101,8 @@ enum VAO_Type
 {
 	VAO_TRIANGLE,
 	VAO_RECTANGLE,
+	VAO_LIGHT_CONTAINER,
+	VAO_LIGHT,
 
 	VAO_MAX
 };
@@ -110,15 +110,7 @@ enum VAO_Type
 struct Shader;
 struct Texture;
 struct Camera;
-
-struct VertexData
-{
-	GLfloat *vertices;
-	size_t verticesSize;
-
-	GLuint *indices;
-	size_t indicesSize;
-};
+struct TransformManager;
 
 struct VAO_Container
 {
@@ -132,10 +124,11 @@ struct VAO_Container
 
 struct OpenGLInfo
 {
-	VAO_Container	VAOs[10];
-	u32				NextAvailableIndex;
+	VAO_Container		VAOs[32];
+	u32					NextAvailableIndex;
 
-	Camera			*Camera;
+	Camera				*Camera;
+	TransformManager	*Transform;
 };
 
 struct InputManager

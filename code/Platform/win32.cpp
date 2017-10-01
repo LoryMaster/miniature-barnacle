@@ -1,7 +1,9 @@
-//#include <Windows.h>
-#include "win32.h"
+#include "Platform\win32.h"
 #include "GameCode\mainGame.h"
 #include "tools\OpenGL\glCore.h"
+
+#define LS_CRT_IMPLEMENTATION
+#include "tools\lsCRT.h"
 
 internal VOID Win32_SetFnPointers()
 {
@@ -402,6 +404,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 {
 	//Win32_SetFnPointers();
 
+	//WriteAtanTable();
+
 	LARGE_INTEGER QueryFreq = {};
 	if (!QueryPerformanceFrequency(&QueryFreq))
 	{
@@ -459,7 +463,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			}
 		}
 
-		glClearColor(0.0f, 0.75f, 1.0f, 1.0f);
+		//glClearColor(0.0f, 0.75f, 1.0f, 1.0f);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		GameLoop(&Game, &Arena, &Screen, &OpenGL, &Input);
