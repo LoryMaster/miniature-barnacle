@@ -10,15 +10,15 @@ enum GAME_MODE
 	NUM_MODE
 };
 
-struct Bitmap
-{
-	void *data;
-
-	u32 width;
-	u32 height;
-
-	u32 size;
-};
+//struct Bitmap
+//{
+//	void *data;
+//
+//	u32 width;
+//	u32 height;
+//
+//	u32 size;
+//};
 
 struct VertexData
 {

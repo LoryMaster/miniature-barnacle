@@ -4,26 +4,19 @@
 
 void LoadTexture(GameInfo *Game, MemoryArena *Memory, const char *Path)
 {
-	FileInfo File = {};
-	Memory->ReadEntireFile(Path, &File, &Memory->PermanentMemory);
+	char ext[8];
+	ls_getFileExtension((char *)Path, ext);
 
-	if (File.FileType == BITMAP)
+	if (ls_strcmp(ext, "bmp") == 0)
 	{
-		u32 PixelOffset	= *((u32 *)((char *)File.data + 10));
-		u32 HeaderSize	= *((u32 *)((char *)File.data + 14));
+		Bitmap bitmap = { 0 };
+		ls_loadBitmap((char *)Path, &bitmap);
+		Game->bitmaps[Game->NextBitmapIndex++] = bitmap;
+	}
 
-		s32 Width		= *((s32 *)((char *)File.data + 18));
-		s32 Height		= *((s32 *)((char *)File.data + 22));
-		Height = ls_abs(Height);
+	else if (ls_strcmp(ext, "png") == 0)
+	{
 
-		u32 Compression = *((u32 *)((char *)File.data + 30));
-
-		u32 PixelBufferSize = *((u32 *)((char *)File.data + 34));
-
-		Game->bitmaps[Game->NextBitmapIndex].data = ((char *)File.data + PixelOffset);
-		Game->bitmaps[Game->NextBitmapIndex].width = Width;
-		Game->bitmaps[Game->NextBitmapIndex].height = Height;
-		Game->bitmaps[Game->NextBitmapIndex++].size = (u32)File.size;
 	}
 }
 
@@ -111,6 +104,7 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, Texture->Tex[i]);
 		ls_sprintf(texName, "myTexture[%d]", i);
+		//ls_sprintf(texName, "material.diffuse");
 		glUniform1i(glGetUniformLocation(Program, texName), i);
 	}
 
@@ -139,6 +133,12 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 	}
 
 	glBindVertexArray(VAO);
+
+	if (Type == VAO_RECTANGLE)
+	{
+		GLuint TransformLoc = glGetUniformLocation(Program, "transform");
+		glUniformMatrix4fv(TransformLoc, 1, GL_TRUE, (GLfloat *)OpenGL->Transform->Transform.values);
+	}
 
 	if (Type == VAO_LIGHT_CONTAINER)
 	{
@@ -286,22 +286,22 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 		-0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
 		-0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
 		-0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
 							   
 		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
 		 0.5f,  0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f,
 		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f, 0.0f,  0.0f, 1.0f,
 		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f, 0.0f,
 							   
 		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 1.0f,
 		 0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 1.0f,
 		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f,  0.0f, -1.0f, 0.0f,  1.0f, 0.0f,
 		-0.5f, -0.5f, -0.5f,  0.0f, -1.0f, 0.0f,  0.0f, 1.0f,
 							   
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f, 0.0f,  0.0f, 1.0f,
@@ -396,6 +396,10 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	TEXTURE_ENUM Names[2] = { TEX_TEST, TEX_TEST_2 };
 	Texture *Tex = InitTextureManager(Memory, Paths, Names, 2);
 
+	/*char *Path = "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/container.bmp";
+	TEXTURE_ENUM Name = TEX_TEST;
+	Texture *Tex = InitTextureManager(Memory, &Path, &Name, 1);*/
+
 	SetupVAO(Game, Memory, OpenGL, VAO_RECTANGLE, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleFrag.frag");
 	SetupVAO(Game, Memory, OpenGL, VAO_LIGHT_CONTAINER, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerFrag.frag");
 	SetupVAO(Game, Memory, OpenGL, VAO_LIGHT, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightFrag.frag");
@@ -403,31 +407,31 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	TransformManager *Transf = OpenGL->Transform;
 
 	SetStandardProjection(Transf);
-	/*fil(3)
+	fil(3)
 	{
 		SetView(Transf, *OpenGL->Camera);
 		SetModel(Transf, cube[i], scale, AngleX, AngleY);
 
 		SetTransform(Transf);
 
-		RenderToScreen(OpenGL, Vertex, VAO_LIGHT);
-	}*/
+		RenderToScreen(OpenGL, Vertex, VAO_RECTANGLE);
+	}
 
-	SetView(Transf, *OpenGL->Camera);
-	SetModel(Transf, cube[2], scale, AngleX, AngleY);
+	//SetView(Transf, *OpenGL->Camera);
+	//SetModel(Transf, cube[2], scale, AngleX, AngleY);
 
-	SetTransform(Transf);
-	RenderToScreen(OpenGL, Vertex, VAO_LIGHT);
+	//SetTransform(Transf);
+	//RenderToScreen(OpenGL, Vertex, VAO_LIGHT);
 
-	SetModel(Transf, cube[0], scale, AngleX, AngleY);
-	SetTransform(Transf);
+	//SetModel(Transf, cube[0], scale, AngleX, AngleY);
+	//SetTransform(Transf);
 
-	RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
+	//RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
 
-	SetModel(Transf, cube[1], scale, AngleX, AngleY);
-	SetTransform(Transf);
+	//SetModel(Transf, cube[1], scale, AngleX, AngleY);
+	//SetTransform(Transf);
 
-	RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
+	//RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
 
 	return;
 }

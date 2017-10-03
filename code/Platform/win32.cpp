@@ -138,6 +138,10 @@ internal VOID Win32_ReadEntireFile(const char *Path, FileInfo *FileInfo, Memory 
 	{
 		FileInfo->FileType = BITMAP;
 	}
+	/*else if (ls_strcmp(ext, "png") == 0)
+	{
+		FileInfo->FileType = PNG;
+	}*/
 
 	if (Win32_GiveMemory(Memory, &FileInfo->data, FileSize.LowPart) == FALSE)
 	{
@@ -226,6 +230,14 @@ internal VOID Win32_SetupOpenGLRenderingContext(ScreenInfo *Screen)
 	Screen->RenderingContext	= wglCreateContext(Screen->DeviceContext);
 	wglMakeCurrent(Screen->DeviceContext, Screen->RenderingContext);
 	LoadGLFunc(Screen->DeviceContext);
+
+	/*Create better context (that allows me to use RenderDoc) with extension function. 
+	Don't know If I should pass the 3rd param which is a list of tuples <name, value> 
+	option to pass for the rendering context creation*/
+	HGLRC OldContext = Screen->RenderingContext;
+	Screen->RenderingContext = wglCreateContextAttribsARB(Screen->DeviceContext, NULL, NULL);
+	wglDeleteContext(OldContext);
+	wglMakeCurrent(Screen->DeviceContext, Screen->RenderingContext);
 
 	glEnable(GL_DEPTH_TEST);
 }

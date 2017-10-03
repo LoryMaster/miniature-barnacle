@@ -4,6 +4,11 @@ Shader *CreateShaderProgram(MemoryArena *Memory, GLchar *vertexShaderPath, GLcha
 {
 	Shader *Result;
 
+	char vsName[64], fsName[64];
+
+	ls_getFileNameFromPath(vertexShaderPath, vsName);
+	ls_getFileNameFromPath(fragmentShaderPath, fsName);
+
 	Memory->Alloc(&Memory->PermanentMemory, (void **)(&Result), sizeof(Shader));
 
 	char *VertexShaderSource = 0, *FragmentShaderSource = 0;
@@ -16,12 +21,14 @@ Shader *CreateShaderProgram(MemoryArena *Memory, GLchar *vertexShaderPath, GLcha
 	{
 		GLint success;
 		GLchar infoLog[512];
+		char dest[512];
 
 		glGetShaderiv(Result->VertexShader, GL_COMPILE_STATUS, &success);
 		if (!success)
 		{
 			glGetShaderInfoLog(Result->VertexShader, 512, NULL, infoLog);
-			LogErrori(infoLog, -1);
+			ls_sprintf(dest, "(%s): %s", vsName, infoLog);
+			LogErrori(dest, -1);
 		}
 	}
 
@@ -31,12 +38,14 @@ Shader *CreateShaderProgram(MemoryArena *Memory, GLchar *vertexShaderPath, GLcha
 	{
 		GLint success;
 		GLchar infoLog[512];
+		char dest[512];
 
 		glGetShaderiv(Result->FragmentShader, GL_COMPILE_STATUS, &success);
 		if (!success)
 		{
 			glGetShaderInfoLog(Result->FragmentShader, 512, NULL, infoLog);
-			LogErrori(infoLog, -1);
+			ls_sprintf(dest, "(%s), %s", fsName, infoLog);
+			LogErrori(dest, -1);
 		}
 	}
 

@@ -35,6 +35,7 @@ enum FILE_TYPE
 {
 	BINARY_DATA,
 	BITMAP,
+	//PNG,
 
 	FILE_TYPE_MAX
 };
