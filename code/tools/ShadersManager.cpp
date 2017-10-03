@@ -62,8 +62,23 @@ Shader *CreateShaderProgram(MemoryArena *Memory, GLchar *vertexShaderPath, GLcha
 }
 
 
-void UseShader(Shader *ShaderProgram)
+void UseShader(GLuint Program)
 {
-	glUseProgram(ShaderProgram->Program);
+	glUseProgram(Program);
 	return;
+}
+
+void Shader::setVec3(const char* name, v3 v)
+{
+	glUniform3f(glGetUniformLocation(this->Program, name), v.x, v.y, v.z);
+}
+
+void Shader::setVec3(const char* name, f32 x, f32 y, f32 z)
+{
+	glUniform3f(glGetUniformLocation(this->Program, name), x, y, z);
+}
+
+void Shader::setFloat(const char* name, f32 value)
+{
+	glUniform1f(glGetUniformLocation(this->Program, name), value);
 }

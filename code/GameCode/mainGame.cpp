@@ -98,10 +98,12 @@ internal void InitTransform(OpenGLInfo *OpenGL, MemoryArena *Memory)
 internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Type)
 {
 	GLuint VAO = OpenGL->VAOs[Type].VAO;
+	Shader *Shader = OpenGL->VAOs[Type].ShaderProgram;
 	GLuint Program = OpenGL->VAOs[Type].ShaderProgram->Program;
 	Texture *Texture = OpenGL->VAOs[Type].Texture;
 
-	glUseProgram(Program);
+	UseShader(Program);
+	//glUseProgram(Program);
 
 	char texName[24] = {};
 	fil(Texture->texQuantity)
@@ -114,11 +116,27 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 
 	if (Type == VAO_LIGHT_CONTAINER)
 	{
-		glUniform3f(glGetUniformLocation(Program, "objectColor"), 1.0f, 0.5f, 0.31f);
-		glUniform3f(glGetUniformLocation(Program, "lightColor"), 1.0f, 1.0f, 1.0f);
-		glUniform3f(glGetUniformLocation(Program, "lightPos"), -1.5f, -2.2f, -2.5f);
-	}
+		v3 cameraPosInModelSpace = V3(OpenGL->Camera->pos * OpenGL->Transform->ModelMatrix);
 
+		Shader->setVec3("objectColor", 1.0f, 0.5f, 0.31f);
+		Shader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
+		Shader->setVec3("lightPos", -1.5f, -2.2f, -2.5f);
+		Shader->setVec3("viewPos", cameraPosInModelSpace);
+
+		Shader->setVec3("material.ambientColor", 1.0f, 0.5f, 0.31f);
+		Shader->setVec3("material.diffuseColor", 1.0f, 0.5f, 0.31f);
+		Shader->setVec3("material.specularColor", 0.5f, 0.5f, 0.5f);
+		Shader->setFloat("material.shininess", 128.0f);
+
+		Shader->setVec3("light.ambientStrength", 0.2f, 0.2f, 0.2f);
+		Shader->setVec3("light.diffuseStrength", 0.5f, 0.5f, 0.5f);
+		Shader->setVec3("light.specularStrength", 1.0f, 1.0f, 1.0f);
+
+		//glUniform3f(glGetUniformLocation(Program, "objectColor"), 1.0f, 0.5f, 0.31f);
+		//glUniform3f(glGetUniformLocation(Program, "lightColor"), 1.0f, 1.0f, 1.0f);
+		//glUniform3f(glGetUniformLocation(Program, "lightPos"), -1.5f, -2.2f, -2.5f);
+		//glUniform3f(glGetUniformLocation(Program, "viewPos"), cameraPosInModelSpace.x, cameraPosInModelSpace.y, cameraPosInModelSpace.z);//OpenGL->Camera->pos.x, OpenGL->Camera->pos.y, OpenGL->Camera->pos.z);
+	}
 
 	glBindVertexArray(VAO);
 
@@ -129,6 +147,9 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 
 		GLuint ModelLoc = glGetUniformLocation(Program, "model");
 		glUniformMatrix4fv(ModelLoc, 1, GL_TRUE, (GLfloat *)OpenGL->Transform->ModelMatrix.values);
+
+		GLuint ModelNormalLoc = glGetUniformLocation(Program, "modelNormal");
+		glUniformMatrix3fv(ModelNormalLoc, 1, GL_TRUE, (GLfloat *)NormalMatrix(OpenGL->Transform->ModelMatrix).values);
 	}
 	
 	else if (Type == VAO_LIGHT)
