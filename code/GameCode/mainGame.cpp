@@ -1,5 +1,6 @@
 #include "tools\OpenGL\glCore.h"
 #include "GameCode\mainGame.h"
+//#include "tools\Maths\Maths.h"
 #include "tools\lsCRT.h"
 
 void LoadTexture(GameInfo *Game, MemoryArena *Memory, const char *Path)
@@ -16,7 +17,9 @@ void LoadTexture(GameInfo *Game, MemoryArena *Memory, const char *Path)
 
 	else if (ls_strcmp(ext, "png") == 0)
 	{
-
+		PNG png = { 0 };
+		ls_loadCompressedPNG((char *)Path, &png);
+		Game->bitmaps[Game->NextBitmapIndex++] = (Bitmap)png;
 	}
 }
 
@@ -392,13 +395,13 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	Vertex.vertices = vertices;
 	Vertex.verticesSize = sizeof(vertices);
 
-	char *Paths[2] = { {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/test.bmp"}, {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/facciaDiUaua.bmp"} };
+	/*char *Paths[2] = { {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/test.bmp"}, {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/facciaDiUaua.bmp"} };
 	TEXTURE_ENUM Names[2] = { TEX_TEST, TEX_TEST_2 };
-	Texture *Tex = InitTextureManager(Memory, Paths, Names, 2);
+	Texture *Tex = InitTextureManager(Memory, Paths, Names, 2);*/
 
-	/*char *Path = "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/container.bmp";
+	char *Path = "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/container.png";
 	TEXTURE_ENUM Name = TEX_TEST;
-	Texture *Tex = InitTextureManager(Memory, &Path, &Name, 1);*/
+	Texture *Tex = InitTextureManager(Memory, &Path, &Name, 1);
 
 	SetupVAO(Game, Memory, OpenGL, VAO_RECTANGLE, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleFrag.frag");
 	SetupVAO(Game, Memory, OpenGL, VAO_LIGHT_CONTAINER, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerFrag.frag");

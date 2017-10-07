@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Platform\win32.h"
+#include "tools\lsCRT.h"
 #include "tools\Maths\Maths.h"
 
 enum GAME_MODE
@@ -9,16 +10,6 @@ enum GAME_MODE
 
 	NUM_MODE
 };
-
-//struct Bitmap
-//{
-//	void *data;
-//
-//	u32 width;
-//	u32 height;
-//
-//	u32 size;
-//};
 
 struct VertexData
 {
