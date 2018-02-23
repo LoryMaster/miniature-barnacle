@@ -1,246 +1,15 @@
-#include "Platform\win32.h"
 #include "tools\OpenGL\glCore.h"
 #include "GameCode\mainGame.h"
+
+#define PLATFORM_IMPLEMENTATION
+#define I_WANT_GRAPHICS
+#include "Platform\lsWindows.h"
 
 #define LS_MATH_IMPLEMENTATION
 #include "tools\Maths\Maths.h"
 
 #define LS_CRT_IMPLEMENTATION
 #include "tools\lsCRT.h"
-
-internal VOID Win32_SetFnPointers()
-{
-	return;
-}
-
-internal ULONGLONG Win32_Time()
-{
-	FILETIME FileTime = {};
-	GetSystemTimeAsFileTime(&FileTime);
-
-	ULARGE_INTEGER Time = {};
-	Time.LowPart = FileTime.dwLowDateTime;
-	Time.HighPart = FileTime.dwHighDateTime;
-
-	ULONGLONG Result = (Time.QuadPart / 10000000);
-	return Result;
-}
-
-internal VOID Win32_AllocateMemory(Memory *Memory, s32 Size, s32 MinimumAllocationSize)
-{
-	Memory->Size = Size;
-	Memory->UsedMemory = 0;
-	Memory->RemainingMemory = Size;
-	Memory->MinimumAllocationSize = MinimumAllocationSize;
-
-	if ((Memory->BeginPointer = VirtualAlloc(NULL, Size, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE)) == NULL)
-	{
-		DWORD Error = GetLastError();
-		LogErrori("When calling VirtualAlloc in Win32_AllocateMemory got error: ", Error);
-	}
-}
-
-internal DWORD Win32_GiveMemory(Memory *Memory, VOID **BasePointer, s32 Size)
-{
-	if ((Memory->RemainingMemory - Size) > 0)
-	{
-		if (Size < Memory->MinimumAllocationSize)
-		{
-			*BasePointer = (VOID *)((u8 *)Memory->BeginPointer + Memory->UsedMemory);
-			Memory->UsedMemory += Memory->MinimumAllocationSize;
-			Memory->RemainingMemory -= Memory->MinimumAllocationSize;
-		}
-		else
-		{
-			*BasePointer = (VOID *)((u8 *)Memory->BeginPointer + Memory->UsedMemory);
-			Memory->UsedMemory += Size;
-			Memory->RemainingMemory -= Size;
-		}
-
-		return TRUE;
-	}
-	else
-	{
-		//@TODO: Fix Crash Path with dinamically growing Arena(IF STRICTLY NECESSARY!)
-		//Assert("Tried To Allocate More Memory than the Arena had to give!!" == 0)
-		return FALSE;
-	}
-}
-
-internal VOID Win32_ReadTextFile(Memory *Memory, char *Path, char **Dest)
-{
-	DWORD Error = 0;
-	HANDLE FileHandle = 0;
-	if ((FileHandle = CreateFileA(Path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL)) == INVALID_HANDLE_VALUE)
-	{
-		Error = GetLastError();
-		LogErrori("When creating a file handle got error: ", Error);
-	}
-
-	LARGE_INTEGER FileSize = {};
-	if (GetFileSizeEx(FileHandle, &FileSize) == 0)
-	{
-		Error = GetLastError();
-		LogErrori("When getting file size got error: ", Error);
-	}
-
-	if (Win32_GiveMemory(Memory, (void **)(Dest), FileSize.LowPart) == FALSE)
-	{
-		OutputDebugStringA("Couldn't Allocate The memory to store File contents into.\n");
-		return;
-	}
-
-	DWORD BytesRead = 0;
-	if (ReadFile(FileHandle, *Dest, FileSize.LowPart, &BytesRead, NULL) == FALSE)
-	{
-		Error = GetLastError();
-		LogErrori("When Reading contents of a file got error: ", Error);
-	}
-	else
-	{
-		if (BytesRead != FileSize.LowPart)
-		{
-			Assert("Bytes read when reading entire file don't equal the file size!!" == 0)
-		}
-	}
-
-	if (CloseHandle(FileHandle) == FALSE)
-	{
-		OutputDebugStringA("Couldn't close file handle at the end of Win32_ReadEntireFile function.\n");
-	}
-}
-
-internal VOID Win32_ReadEntireFile(const char *Path, FileInfo *FileInfo, Memory *Memory)
-{
-	DWORD Error = 0;
-	HANDLE FileHandle = 0;
-	if ((FileHandle = CreateFileA(Path, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL)) == INVALID_HANDLE_VALUE)
-	{
-		Error = GetLastError();
-		LogErrori("When creating a file handle got error: ", Error);
-	}
-
-	LARGE_INTEGER FileSize = {};
-	if (GetFileSizeEx(FileHandle, &FileSize) == 0)
-	{
-		Error = GetLastError();
-		LogErrori("When getting file size got error: ", Error);
-	}
-
-	s32 PathLen = ls_len((char *)Path);
-	char ext[4];
-	ext[0] = Path[PathLen - 3];
-	ext[1] = Path[PathLen - 2];
-	ext[2] = Path[PathLen - 1];
-	ext[3] = 0;
-
-	if (ls_strcmp(ext, "bmp") == 0)
-	{
-		FileInfo->FileType = BITMAP;
-	}
-	/*else if (ls_strcmp(ext, "png") == 0)
-	{
-		FileInfo->FileType = PNG;
-	}*/
-
-	if (Win32_GiveMemory(Memory, &FileInfo->data, FileSize.LowPart) == FALSE)
-	{
-		OutputDebugStringA("Couldn't Allocate The memory to store File contents into.\n");
-		return;
-	}
-
-	DWORD BytesRead = 0;
-	if (ReadFile(FileHandle, FileInfo->data, FileSize.LowPart, &BytesRead, NULL) == FALSE)
-	{
-		Error = GetLastError();
-		LogErrori("When Reading contents of a file got error: ", Error);
-	}
-	else
-	{
-		if (BytesRead != FileSize.LowPart)
-		{
-			Assert("Bytes read when reading entire file don't equal the file size!!" == 0)
-		}
-	}
-
-	if (CloseHandle(FileHandle) == FALSE)
-	{
-		OutputDebugStringA("Couldn't close file handle at the end of Win32_ReadEntireFile function.\n");
-	}
-	FileInfo->size = FileSize.LowPart;
-}
-
-internal VOID Win32_SetupScreen(ScreenInfo *Screen, s32 Height, s32 Width, HINSTANCE Instance)
-{
-	Screen->Height = 1080;
-	Screen->Width = 1920;
-
-	Screen->WindowClass = { 0 };
-	Screen->WindowClass.style = CS_OWNDC | CS_VREDRAW | CS_HREDRAW;
-	Screen->WindowClass.lpfnWndProc = WindowProc;
-	Screen->WindowClass.hInstance = Instance;
-	Screen->WindowClass.hCursor = 0;
-	Screen->WindowClass.lpszMenuName = "Window Menu";
-	Screen->WindowClass.lpszClassName = "Window Class";
-	if (!RegisterClassA(&Screen->WindowClass))
-	{
-		DWORD Error = GetLastError();
-		LogErrori("When Registering WindowClass in Win32_SetupScreen got error: ", Error);
-	}
-
-	//@NOTE: WindowProc function needs to be fully operational before calling CreateWindow(Ex)(A/W) Because it calls it and uses it's return to create the window.
-	//It can be set to return DefWindowProc(A/W) to return all default values and not have to handle them
-	if ((Screen->WindowHandle = CreateWindowExA(0L, Screen->WindowClass.lpszClassName, "Win 32 Platform", WS_OVERLAPPED | WS_VISIBLE , CW_USEDEFAULT, CW_USEDEFAULT, Screen->Width, Screen->Height, 0, 0, Instance, 0)) == nullptr)
-	{
-		DWORD Error = GetLastError();
-		LogErrori("When Retrieving a WindowHandle in Win32_SetupScreen got error: ", Error);
-	}
-
-	//@TODO Make this error path more @ROBUST. SetCapture actually returns an Handle to the previous Window owning mouse capture
-	//If that window wasn't me, it will just post errors without meaning, even if stuff worked.
-	if (SetCapture(Screen->WindowHandle) == NULL)
-	{
-		DWORD Error = GetLastError();
-		LogErrori("When Setting Mouse Capture in Win32_SetupScreen got error: ", Error);
-	}
-
-	if (SetCursorPos(Screen->Width / 2, Screen->Height / 2) == NULL)
-	{
-		DWORD Error = GetLastError();
-		LogErrori("When Setting Cursor Position in Win32_SetupScreen got error: ", Error);
-	}
-}
-
-internal VOID Win32_SetupOpenGLRenderingContext(ScreenInfo *Screen)
-{
-	PIXELFORMATDESCRIPTOR PixelFormat = {};
-
-	PixelFormat.nSize			= sizeof(PIXELFORMATDESCRIPTOR);
-	PixelFormat.nVersion		= 1;
-	PixelFormat.dwFlags			= PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-	PixelFormat.iPixelType		= PFD_TYPE_RGBA;
-	PixelFormat.cColorBits		= 32;	//Colordepth of the framebuffer
-	PixelFormat.cDepthBits		= 24;	//Number of bits for the depthbuffer
-	PixelFormat.cStencilBits	= 8;	//Number of bits for the stencilbuffer
-
-	Screen->DeviceContext		= GetDC(Screen->WindowHandle);
-	s32 PixelFormatValue		= ChoosePixelFormat(Screen->DeviceContext, &PixelFormat);
-	SetPixelFormat(Screen->DeviceContext, PixelFormatValue, &PixelFormat);
-
-	Screen->RenderingContext	= wglCreateContext(Screen->DeviceContext);
-	wglMakeCurrent(Screen->DeviceContext, Screen->RenderingContext);
-	LoadGLFunc(Screen->DeviceContext);
-
-	/*Create better context (that allows me to use RenderDoc) with extension function. 
-	Don't know If I should pass the 3rd param which is a list of tuples <name, value> 
-	option to pass for the rendering context creation*/
-	HGLRC OldContext = Screen->RenderingContext;
-	Screen->RenderingContext = wglCreateContextAttribsARB(Screen->DeviceContext, NULL, NULL);
-	wglDeleteContext(OldContext);
-	wglMakeCurrent(Screen->DeviceContext, Screen->RenderingContext);
-
-	glEnable(GL_DEPTH_TEST);
-}
 
 internal VOID Win32_ProcessKeyboard(KeyboardManager *Keyboard, MSG Msg)
 {
@@ -342,7 +111,7 @@ internal VOID Win32_ProcessMouse(MouseManager *Mouse, MSG Msg)
 			if (!GetCursorPos(&MousePos))
 			{
 				DWORD Error = GetLastError();
-				LogErrori("When retrieving mouse position in Win32_ProcessMouse got error: ", Error);
+				ls_printf("When retrieving mouse position in Win32_ProcessMouse got error: %d", Error);
 			}
 			Mouse->mouseX = (f32)MousePos.x;
 			Mouse->mouseY = (f32)MousePos.y;
@@ -394,7 +163,7 @@ internal LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM wParam, L
 				if (SetCapture(Window) == NULL)
 				{
 					DWORD Error = GetLastError();
-					LogErrori("When Setting Mouse Capture in WindowProc got error: ", Error);
+					ls_printf("When Setting Mouse Capture in WindowProc got error: ", Error);
 				}
 			}
 			else
@@ -403,7 +172,7 @@ internal LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM wParam, L
 				if (ReleaseCapture() == NULL)
 				{
 					DWORD Error = GetLastError();
-					LogErrori("When Setting Mouse Capture in WindowProc got error: ", Error);
+					ls_printf("When Setting Mouse Capture in WindowProc got error: ", Error);
 				}
 			}
 			break;
@@ -417,29 +186,30 @@ internal LRESULT CALLBACK WindowProc(HWND Window, UINT Message, WPARAM wParam, L
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	//Win32_SetFnPointers();
 
-	//WriteAtanTable();
+#ifdef LS_PLAT_WINDOWS
+	AllocConsole();
+#endif
 
 	LARGE_INTEGER QueryFreq = {};
 	if (!QueryPerformanceFrequency(&QueryFreq))
 	{
 		DWORD Error = GetLastError();
-		LogErrori("Error in QueryPerformanceFrequency call: ", Error);
+		ls_printf("Error in QueryPerformanceFrequency call: ", Error);
 	}
 
-	ScreenInfo Screen = {};
-	Win32_SetupScreen(&Screen, 1920, 1080, hInstance);
-	Win32_SetupOpenGLRenderingContext(&Screen);
+	WindowInfo Screen = {};
+	Screen.Height = 1080;
+	Screen.Width = 1920;
+	Screen.properties = LS_UNIQUEDC | LS_HREDRAW | LS_VREDRAW;
+	Screen.style = LS_OVERLAPPED | LS_VISIBLE;
+	Screen.className = "Window Class";
+	Screen.menuName = "Window Menu";
+	Screen.windowName = "Window";
+	Screen.WindowProc = WindowProc;
 
-	MemoryArena Arena = {};
-	Win32_AllocateMemory(&Arena.PermanentMemory, Megabyte(512), 4);
-	Arena.Alloc = &Win32_GiveMemory;
-	Arena.Time = &Win32_Time;
-	Arena.ReadTextFile = &Win32_ReadTextFile;
-	Arena.ReadEntireFile = &Win32_ReadEntireFile;
-	Arena.StartingTime = Win32_Time();
-	Arena.MsPerFrame = 16.67f;
+	ls_createWindow(&Screen);
+	ls_setupOpenGLContext(&Screen);
 
 	OpenGLInfo OpenGL = {};
 
@@ -459,7 +229,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	if (!QueryPerformanceCounter(&FirstCounter))
 	{
 		DWORD Error = GetLastError();
-		LogErrori("Error calling QueryPerformanceCounter at the beginning of the loop: ", Error);
+		ls_printf("Error calling QueryPerformanceCounter at the beginning of the loop: ", Error);
 	}
 	while(Running)
 	{
@@ -482,7 +252,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		GameLoop(&Game, &Arena, &Screen, &OpenGL, &Input);
+		GameLoop(&Game, &Screen, &OpenGL, &Input);
 
 		HWND ActiveWindow = GetActiveWindow();
 		if (ActiveWindow == Screen.WindowHandle)
@@ -493,14 +263,14 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		if (SwapBuffers(Screen.DeviceContext) == FALSE)
 		{
 			DWORD Error = GetLastError();
-			LogErrori("In swapping buffers error: ", Error);
+			ls_printf("In swapping buffers error: ", Error);
 		}
 
 		LARGE_INTEGER LastCounter = {};
 		if (!QueryPerformanceCounter(&LastCounter))
 		{
 			DWORD Error = GetLastError();
-			LogErrori("Error calling QueryPerformanceCounter at the end of the loop: ", Error);
+			ls_printf("Error calling QueryPerformanceCounter at the end of the loop: ", Error);
 		}
 
 		s64 CounterDelta = LastCounter.QuadPart - FirstCounter.QuadPart;

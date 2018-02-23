@@ -1,9 +1,9 @@
 #include "tools\OpenGL\Managers\TransformManager.h"
 
-TransformManager *createTransform(MemoryArena *Memory)
+TransformManager *createTransform()
 {
 	TransformManager *Transform = 0;
-	Memory->Alloc(&Memory->PermanentMemory, (void **)&Transform, sizeof(TransformManager));
+	Transform = (TransformManager *)ls_alloc(sizeof(TransformManager));
 
 	return Transform;
 }

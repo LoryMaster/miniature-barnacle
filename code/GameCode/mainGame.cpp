@@ -1,9 +1,9 @@
 #include "tools\OpenGL\glCore.h"
 #include "GameCode\mainGame.h"
-//#include "tools\Maths\Maths.h"
+#include "tools\Maths\Maths.h"
 #include "tools\lsCRT.h"
 
-void LoadTexture(GameInfo *Game, MemoryArena *Memory, const char *Path)
+void LoadTexture(GameInfo *Game, const char *Path)
 {
 	char ext[8];
 	ls_getFileExtension((char *)Path, ext);
@@ -14,13 +14,16 @@ void LoadTexture(GameInfo *Game, MemoryArena *Memory, const char *Path)
 		ls_loadBitmap((char *)Path, &bitmap);
 		Game->bitmaps[Game->NextBitmapIndex++] = bitmap;
 	}
-
+	/*
 	else if (ls_strcmp(ext, "png") == 0)
 	{
 		PNG png = { 0 };
 		ls_loadCompressedPNG((char *)Path, &png);
+		Bitmap bitmap = { 0 };
+		ls_Deflate((char *)png.compressedData, png.size, (char *)bitmap.data);
 		Game->bitmaps[Game->NextBitmapIndex++] = (Bitmap)png;
 	}
+	*/
 }
 
 //@TODO Better Input Control?
@@ -75,19 +78,18 @@ internal void ProcessCameraInput(KeyboardManager *Keyboard, Camera *Camera, v3 c
 	}
 }
 
-internal void InitCamera(OpenGLInfo *OpenGL, MemoryArena *Memory)
+internal void InitCamera(OpenGLInfo *OpenGL)
 {
 	v4 pos = { 0.0f, 0.0f, 15.0f, 1.0f };
 	v4 target = { 0.0f, 0.0f, 0.0f, 1.0f };
-	Camera *Camera = createCamera(Memory, pos, target);
+	Camera *Camera = createCamera(pos, target);
 
 	OpenGL->Camera = Camera;
 }
 
-internal void InitTransform(OpenGLInfo *OpenGL, MemoryArena *Memory)
+internal void InitTransform(OpenGLInfo *OpenGL)
 {
-	TransformManager *Transform = createTransform(Memory);
-
+	TransformManager *Transform = createTransform();
 	OpenGL->Transform = Transform;
 }
 
@@ -102,13 +104,14 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 	//glUseProgram(Program);
 
 	char texName[24] = {};
-	fil(Texture->texQuantity)
+	for(s32 i = 0; i < Texture->texQuantity; i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, Texture->Tex[i]);
 		ls_sprintf(texName, "myTexture[%d]", i);
-		//ls_sprintf(texName, "material.diffuse");
-		glUniform1i(glGetUniformLocation(Program, texName), i);
+		//ls_sprintf(texName, "myTexture");
+		GLuint Loc = glGetUniformLocation(Program, texName);
+		glUniform1i(Loc, i);
 	}
 
 	if (Type == VAO_LIGHT_CONTAINER)
@@ -135,12 +138,12 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 		//glUniform3f(glGetUniformLocation(Program, "viewPos"), cameraPosInModelSpace.x, cameraPosInModelSpace.y, cameraPosInModelSpace.z);//OpenGL->Camera->pos.x, OpenGL->Camera->pos.y, OpenGL->Camera->pos.z);
 	}
 
-	glBindVertexArray(VAO);
-
 	if (Type == VAO_RECTANGLE)
 	{
-		GLuint TransformLoc = glGetUniformLocation(Program, "transform");
-		glUniformMatrix4fv(TransformLoc, 1, GL_TRUE, (GLfloat *)OpenGL->Transform->Transform.values);
+		Shader->setMat4("transform", (f32 *)OpenGL->Transform->Transform.values);
+		Shader->setInt("numOfTextures", Texture->texQuantity);
+		//GLuint TransformLoc = glGetUniformLocation(Program, "transform");
+		//glUniformMatrix4fv(TransformLoc, 1, GL_TRUE, (GLfloat *)OpenGL->Transform->Transform.values);
 	}
 
 	if (Type == VAO_LIGHT_CONTAINER)
@@ -161,11 +164,14 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 		glUniformMatrix4fv(TransformLoc, 1, GL_TRUE, (GLfloat *)OpenGL->Transform->Transform.values);
 	}
 
+	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)(Vertex.verticesSize / (8*sizeof(GLfloat))));
+	
+	/*This is probably completely useless and just a performance sink */
 	glBindVertexArray(0);
 }
 
-internal void SetupVAO(GameInfo *Game, MemoryArena *Memory, OpenGLInfo *OpenGL, VAO_Type Type, VertexData Vertex, Texture *Tex, char *VSPath, char *FSPath)
+internal void SetupVAO(GameInfo *Game, OpenGLInfo *OpenGL, VAO_Type Type, VertexData Vertex, Texture *Tex, char *VSPath, char *FSPath)
 {
 	GLuint *VAO = &OpenGL->VAOs[Type].VAO;
 
@@ -196,12 +202,12 @@ internal void SetupVAO(GameInfo *Game, MemoryArena *Memory, OpenGLInfo *OpenGL, 
 		glBindVertexArray(0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-		fil(Tex->texQuantity)
+		for(s32 i = 0; i < Tex->texQuantity; i++)
 		{
-			GenAndBindTexture(Tex->Path[i], Game, Memory, Tex, i);
+			GenAndBindTexture(Tex->Path[i], Game, Tex, i);
 		}
 		
-		Shader *ShaderProgram = CreateShaderProgram(Memory, VSPath, FSPath);
+		Shader *ShaderProgram = CreateShaderProgram(VSPath, FSPath);
 		OpenGL->VAOs[Type].ShaderProgram = ShaderProgram;
 		OpenGL->VAOs[Type].Texture = Tex;
 		OpenGL->VAOs[Type].Type = Type;
@@ -210,13 +216,13 @@ internal void SetupVAO(GameInfo *Game, MemoryArena *Memory, OpenGLInfo *OpenGL, 
 	}
 }
 
-extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen, OpenGLInfo *OpenGL, InputManager *Input)
+extern "C" void GameLoop(GameInfo *Game, WindowInfo *Screen, OpenGLInfo *OpenGL, InputManager *Input)
 {
 	KeyboardManager *Keyboard = Input->Keyboard;
 	MouseManager	*Mouse = Input->Mouse;
 
-	if (!OpenGL->Camera)	{ InitCamera(OpenGL, Memory); }
-	if (!OpenGL->Transform) { InitTransform(OpenGL, Memory); }
+	if (!OpenGL->Camera)	{ InitCamera(OpenGL); }
+	if (!OpenGL->Transform) { InitTransform(OpenGL); }
 
 	static v3 cameraFront = { 0.0f, 0.0f, -1.0f };
 
@@ -395,22 +401,23 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	Vertex.vertices = vertices;
 	Vertex.verticesSize = sizeof(vertices);
 
-	/*char *Paths[2] = { {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/test.bmp"}, {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/facciaDiUaua.bmp"} };
+	char *Paths[2] = { {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/test.bmp"}, {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/facciaDiUaua.bmp"} };
 	TEXTURE_ENUM Names[2] = { TEX_TEST, TEX_TEST_2 };
-	Texture *Tex = InitTextureManager(Memory, Paths, Names, 2);*/
+	Texture *Tex = InitTextureManager(Paths, Names, 2);
 
-	char *Path = "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/container.png";
-	TEXTURE_ENUM Name = TEX_TEST;
-	Texture *Tex = InitTextureManager(Memory, &Path, &Name, 1);
+	//char *Path = "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/container.bmp";
+	//TEXTURE_ENUM Name = TEX_TEST;
 
-	SetupVAO(Game, Memory, OpenGL, VAO_RECTANGLE, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleFrag.frag");
-	SetupVAO(Game, Memory, OpenGL, VAO_LIGHT_CONTAINER, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerFrag.frag");
-	SetupVAO(Game, Memory, OpenGL, VAO_LIGHT, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightFrag.frag");
+	//Texture *Tex = InitTextureManager(&Path, &Name, 1);
+
+	SetupVAO(Game, OpenGL, VAO_RECTANGLE, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleFrag.frag");
+	SetupVAO(Game, OpenGL, VAO_LIGHT_CONTAINER, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerFrag.frag");
+	SetupVAO(Game, OpenGL, VAO_LIGHT, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightFrag.frag");
 
 	TransformManager *Transf = OpenGL->Transform;
 
 	SetStandardProjection(Transf);
-	fil(3)
+	for(s32 i = 0; i < 3; i++)
 	{
 		SetView(Transf, *OpenGL->Camera);
 		SetModel(Transf, cube[i], scale, AngleX, AngleY);
@@ -435,6 +442,8 @@ extern "C" void GameLoop(GameInfo *Game, MemoryArena *Memory, ScreenInfo *Screen
 	//SetTransform(Transf);
 
 	//RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
+
+	FreeTextureManager(Tex);
 
 	return;
 }

@@ -1,11 +1,11 @@
 #include "tools\OpenGL\Managers\Camera.h"
+#include "tools\lsCRT.h"
 
-Camera *createCamera(MemoryArena *Memory, v4 pos, v4 target)
+Camera *createCamera(v4 pos, v4 target)
 {
 	Camera * Result = {};
-
-	Memory->Alloc(&Memory->PermanentMemory, (void **)&Result, sizeof(Camera));
-
+	
+	Result = (Camera *)ls_alloc(sizeof(Camera));
 	Result->pos = pos;
 	Result->target = target;
 
