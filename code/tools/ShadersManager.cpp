@@ -73,6 +73,14 @@ void UseShader(GLuint Program)
 	return;
 }
 
+void Shader::setTexture(const char* name, Texture* Texture, s32 idx)
+{
+	glActiveTexture(GL_TEXTURE0 + idx);
+	glBindTexture(GL_TEXTURE_2D, Texture->Tex[idx]);
+	GLuint Loc = glGetUniformLocation(this->Program, name);
+	glUniform1i(Loc, idx); //Index of the texture unit. Can't pass GL_TEXTURE0 + i because it would be considered enum?
+}
+
 void Shader::setVec3(const char* name, v3 v)
 {
 	glUniform3f(glGetUniformLocation(this->Program, name), v.x, v.y, v.z);
