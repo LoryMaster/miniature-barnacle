@@ -28,10 +28,10 @@ void FreeTextureManager(Texture *Tex)
 	ls_free(Tex);
 }
 
-void GenAndBindTexture(const char *Path, GameInfo *Game, Texture *TextureManager, u32 idx)
+void GenAndBindTexture(const char *Path, GameInfo *Game, Texture *TextureManager)
 {
-	glGenTextures(1, &TextureManager->Tex[idx]);
-	glBindTexture(GL_TEXTURE_2D, TextureManager->Tex[idx]);
+	glGenTextures(1, &TextureManager->Tex[TextureManager->texIdx]);
+	glBindTexture(GL_TEXTURE_2D, TextureManager->Tex[TextureManager->texIdx++]);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -42,6 +42,9 @@ void GenAndBindTexture(const char *Path, GameInfo *Game, Texture *TextureManager
 
 	Bitmap currBitmap = Game->bitmaps[Game->NextBitmapIndex - 1];
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, currBitmap.width, currBitmap.height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, currBitmap.data);
-
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{ ls_printf("OpenGL reported error: %d when binding texture %s", error, Path); }
 }

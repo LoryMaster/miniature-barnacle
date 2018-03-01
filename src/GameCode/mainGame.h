@@ -144,4 +144,4 @@ internal void ProcessCameraInput(KeyboardManager *Keyboard, Camera *Camera, v3 c
 internal void InitCamera(OpenGLInfo *OpenGL);
 internal void InitTransform(OpenGLInfo *OpenGL);
 internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Type);
-internal void SetupVAO(GameInfo *Game, OpenGLInfo *OpenGL, VAO_Type Type, VertexData Vertex, Texture *Tex, char *VSPath, char *FSPath);
+internal void SetupVAO(GameInfo *Game, OpenGLInfo *OpenGL, VAO_Type Type, VertexData Vertex, char **texPaths, u32 texQuantity, char *VSPath, char *FSPath);

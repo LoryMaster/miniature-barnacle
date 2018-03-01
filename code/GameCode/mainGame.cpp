@@ -102,17 +102,22 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 
 	UseShader(Program);
 	//glUseProgram(Program);
-
+#if 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, Texture->Tex[0]);
+	GLuint Loc = glGetUniformLocation(Program, "myTexture");
+	glUniform1i(Loc, 0);
+#else
 	char texName[24] = {};
 	for(s32 i = 0; i < Texture->texQuantity; i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, Texture->Tex[i]);
 		ls_sprintf(texName, "myTexture[%d]", i);
-		//ls_sprintf(texName, "myTexture");
 		GLuint Loc = glGetUniformLocation(Program, texName);
-		glUniform1i(Loc, i);
+		glUniform1i(Loc, i); //Index of the texture unit. Can't pass GL_TEXTURE0 + i because it would be considered enum?
 	}
+#endif
 
 	if (Type == VAO_LIGHT_CONTAINER)
 	{
@@ -165,13 +170,17 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 	}
 
 	glBindVertexArray(VAO);
-	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)(Vertex.verticesSize / (8*sizeof(GLfloat))));
+#if 0
 	
+	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)(Vertex.verticesSize / (5 * sizeof(GLfloat))));
+#else
+	glDrawArrays(GL_TRIANGLES, 0, (GLsizei)(Vertex.verticesSize / (8*sizeof(GLfloat))));
+#endif
 	/*This is probably completely useless and just a performance sink */
 	glBindVertexArray(0);
 }
 
-internal void SetupVAO(GameInfo *Game, OpenGLInfo *OpenGL, VAO_Type Type, VertexData Vertex, Texture *Tex, char *VSPath, char *FSPath)
+internal void SetupVAO(GameInfo *Game, OpenGLInfo *OpenGL, VAO_Type Type, VertexData Vertex, char **texPaths, u32 texQuantity, char *VSPath, char *FSPath)
 {
 	GLuint *VAO = &OpenGL->VAOs[Type].VAO;
 
@@ -189,6 +198,13 @@ internal void SetupVAO(GameInfo *Game, OpenGLInfo *OpenGL, VAO_Type Type, Vertex
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Vertex.indicesSize, Vertex.indices, GL_STATIC_DRAW);
 
+#if 0
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
+		glEnableVertexAttribArray(0);
+
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(1);
+#else
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
 		glEnableVertexAttribArray(0);
 
@@ -197,14 +213,18 @@ internal void SetupVAO(GameInfo *Game, OpenGLInfo *OpenGL, VAO_Type Type, Vertex
 
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
 		glEnableVertexAttribArray(2);
+#endif
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	
+		TEXTURE_ENUM Names[2] = { TEX_TEST, TEX_TEST_2 };
+		Texture *Tex = InitTextureManager(texPaths, Names, texQuantity);
 
 		for(s32 i = 0; i < Tex->texQuantity; i++)
 		{
-			GenAndBindTexture(Tex->Path[i], Game, Tex, i);
+			GenAndBindTexture(Tex->Path[i], Game, Tex);
 		}
 		
 		Shader *ShaderProgram = CreateShaderProgram(VSPath, FSPath);
@@ -275,7 +295,97 @@ extern "C" void GameLoop(GameInfo *Game, WindowInfo *Screen, OpenGLInfo *OpenGL,
 		OpenGL->Camera->target = OpenGL->Camera->pos + V4(cameraFront);
 	}
 
+#if 0
 
+	GLfloat vertices[] = {
+		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+		-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f, 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+
+		-0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		-0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+
+		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+		 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+
+		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+		 0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f, 0.0f, 0.0f,
+		 0.5f, -0.5f,  0.5f, 1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f,
+		 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+		 0.5f,  0.5f,  0.5f, 1.0f, 0.0f,
+		-0.5f,  0.5f,  0.5f, 0.0f, 0.0f,
+		-0.5f,  0.5f, -0.5f, 0.0f, 1.0f
+	};
+
+	GLuint indices[] =	{
+		0, 1, 2,
+		2, 3, 0,
+
+		0, 1, 2,
+		2, 3, 0,
+
+		0, 1, 2,
+		2, 3, 0,
+
+		0, 1, 2,
+		2, 3, 0,
+
+		0, 1, 2,
+		2, 3, 0,
+
+		0, 1, 2,
+		2, 3, 0,
+	};
+
+	v4 cube = { 0.0f,  0.0f,  0.0f, 1.0f };
+
+	v4 scale = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	VertexData Vertex = {};
+	Vertex.indices = indices;
+	Vertex.indicesSize = sizeof(indices);
+	Vertex.vertices = vertices;
+	Vertex.verticesSize = sizeof(vertices);
+
+	char *Paths = { "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/test.bmp" };
+
+	SetupVAO(Game, OpenGL, VAO_RECTANGLE, Vertex, &Paths, 1,"F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleFrag.frag");
+
+	TransformManager *Transf = OpenGL->Transform;
+
+	SetStandardProjection(Transf);
+	
+	SetView(Transf, *OpenGL->Camera);
+	SetModel(Transf, cube, scale, AngleX, AngleY);
+	SetTransform(Transf);
+
+	RenderToScreen(OpenGL, Vertex, VAO_RECTANGLE);
+
+#else
 	//TEMPORARY VERTEX DATA (V3 pos, V3 normals, V2 uvs)
 	GLfloat vertices[] = {
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f,
@@ -401,18 +511,18 @@ extern "C" void GameLoop(GameInfo *Game, WindowInfo *Screen, OpenGLInfo *OpenGL,
 	Vertex.vertices = vertices;
 	Vertex.verticesSize = sizeof(vertices);
 
-	char *Paths[2] = { {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/test.bmp"}, {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/facciaDiUaua.bmp"} };
-	TEXTURE_ENUM Names[2] = { TEX_TEST, TEX_TEST_2 };
-	Texture *Tex = InitTextureManager(Paths, Names, 2);
-
 	//char *Path = "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/container.bmp";
 	//TEXTURE_ENUM Name = TEX_TEST;
 
 	//Texture *Tex = InitTextureManager(&Path, &Name, 1);
 
-	SetupVAO(Game, OpenGL, VAO_RECTANGLE, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleFrag.frag");
-	SetupVAO(Game, OpenGL, VAO_LIGHT_CONTAINER, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerFrag.frag");
-	SetupVAO(Game, OpenGL, VAO_LIGHT, Vertex, Tex, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightFrag.frag");
+	char *Paths[2] = { { "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/test.bmp" },{ "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/facciaDiUaua.bmp" } };
+	
+	char *Path = { "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/container.bmp" };
+
+	SetupVAO(Game, OpenGL, VAO_RECTANGLE, Vertex, &Path, 1, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleFrag.frag");
+	SetupVAO(Game, OpenGL, VAO_LIGHT_CONTAINER, Vertex, Paths, 2, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerFrag.frag");
+	SetupVAO(Game, OpenGL, VAO_LIGHT, Vertex, Paths, 2, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightFrag.frag");
 
 	TransformManager *Transf = OpenGL->Transform;
 
@@ -442,8 +552,6 @@ extern "C" void GameLoop(GameInfo *Game, WindowInfo *Screen, OpenGLInfo *OpenGL,
 	//SetTransform(Transf);
 
 	//RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
-
-	FreeTextureManager(Tex);
-
+#endif
 	return;
 }
