@@ -78,8 +78,7 @@ struct MouseManager
 
 enum VAO_Type
 {
-	VAO_TRIANGLE,
-	VAO_RECTANGLE,
+	VAO_CUBE,
 	VAO_LIGHT_CONTAINER,
 	VAO_LIGHT,
 

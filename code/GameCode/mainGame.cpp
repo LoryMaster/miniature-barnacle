@@ -31,19 +31,19 @@ internal void ProcessWorldInput(KeyboardManager *Keyboard, f32 *AngleX, f32 *Ang
 {
 	if (Keyboard->Key_W == TRUE)
 	{
-		*AngleX += 0.1f;
+		*AngleX += 0.01f;
 	}
 	if (Keyboard->Key_D == TRUE)
 	{
-		*AngleY += 0.1f;
+		*AngleY += 0.01f;
 	}
 	if (Keyboard->Key_S == TRUE)
 	{
-		*AngleX -= 0.1f;
+		*AngleX -= 0.01f;
 	}
 	if (Keyboard->Key_A == TRUE)
 	{
-		*AngleY -= 0.1f;
+		*AngleY -= 0.01f;
 	}
 }
 
@@ -99,35 +99,49 @@ internal void RenderToScreen(OpenGLInfo *OpenGL, VertexData Vertex, VAO_Type Typ
 	Shader *Shader = OpenGL->VAOs[Type].ShaderProgram;
 	GLuint Program = OpenGL->VAOs[Type].ShaderProgram->Program;
 	Texture *Texture = OpenGL->VAOs[Type].Texture;
-	char texName[24] = {};
+	
 
 	UseShader(Program);
 
+	char texName[24] = {};
+	v3 cameraPosInModelSpace = V3(OpenGL->Camera->pos * OpenGL->Transform->ModelMatrix);
+
 	switch (Type)
 	{
-		case VAO_RECTANGLE:
-			for (s32 i = 0; i < Texture->texQuantity; i++)
+		case VAO_CUBE:
+
+			Shader->setTexture("diffuse", Texture, 0);
+			Shader->setTexture("specular", Texture, 1);
+			/* I'll maybe add extra textures later...
+			for (s32 i = 1; i < Texture->texQuantity - 1; i++)
 			{
 				ls_sprintf(texName, "myTexture[%d]", i);
 				Shader->setTexture(texName, Texture, i);
 			}
-
-			Shader->setMat4("transform", (f32 *)OpenGL->Transform->Transform.values);
+			*/
 			Shader->setInt("numOfTextures", Texture->texQuantity);
+
+			Shader->setFloat("material.shininess", 128.0f);
+
+			Shader->setVec3("light.pos", -1.5f, -2.2f, -2.5f);
+			Shader->setVec3("light.ambientStrength", 0.2f, 0.2f, 0.2f);
+			Shader->setVec3("light.diffuseStrength", 0.5f, 0.5f, 0.5f);
+			Shader->setVec3("light.specularStrength", 1.0f, 1.0f, 1.0f);
+
+			Shader->setMat4("transform", (GLfloat *)OpenGL->Transform->Transform.values);
+			Shader->setVec3("viewPos", cameraPosInModelSpace);
+			Shader->setMat4("model", (GLfloat *)OpenGL->Transform->ModelMatrix.values);
+			Shader->setMat4("modelNormal", (GLfloat *)NormalMatrix(OpenGL->Transform->ModelMatrix).values);
+			
 			break;
 
 		case VAO_LIGHT_CONTAINER:
-			v3 cameraPosInModelSpace = V3(OpenGL->Camera->pos * OpenGL->Transform->ModelMatrix);
-
 			Shader->setTexture("diffuse", Texture, 0);
 
 			Shader->setVec3("objectColor", 1.0f, 0.5f, 0.31f);
 			Shader->setVec3("lightColor", 1.0f, 1.0f, 1.0f);
 			Shader->setVec3("lightPos", -1.5f, -2.2f, -2.5f);
 			Shader->setVec3("viewPos", cameraPosInModelSpace);
-
-			//Shader->setVec3("material.ambientColor", 1.0f, 0.5f, 0.31f);
-			//Shader->setVec3("material.diffuseColor", 1.0f, 0.5f, 0.31f);
 			Shader->setVec3("material.specularColor", 0.5f, 0.5f, 0.5f);
 			Shader->setFloat("material.shininess", 64.0f);
 
@@ -184,18 +198,21 @@ internal void SetupVAO(GameInfo *Game, OpenGLInfo *OpenGL, VAO_Type Type, Vertex
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	
-		TEXTURE_ENUM Names[2] = { TEX_TEST, TEX_TEST_2 };
-		Texture *Tex = InitTextureManager(texPaths, Names, texQuantity);
 
-		for(s32 i = 0; i < Tex->texQuantity; i++)
+		if (texPaths != NULL)
 		{
-			GenAndBindTexture(Tex->Path[i], Game, Tex);
+			TEXTURE_ENUM Names[2] = { TEX_TEST, TEX_TEST_2 };
+			Texture *Tex = InitTextureManager(texPaths, Names, texQuantity);
+
+			for (s32 i = 0; i < Tex->texQuantity; i++)
+			{
+				GenAndBindTexture(Tex->Path[i], Game, Tex);
+			}
+
+			OpenGL->VAOs[Type].Texture = Tex;
 		}
-		
 		Shader *ShaderProgram = CreateShaderProgram(VSPath, FSPath);
 		OpenGL->VAOs[Type].ShaderProgram = ShaderProgram;
-		OpenGL->VAOs[Type].Texture = Tex;
 		OpenGL->VAOs[Type].Type = Type;
 		OpenGL->VAOs[Type].IndexInContainer = OpenGL->NextAvailableIndex;
 		OpenGL->NextAvailableIndex++;
@@ -386,14 +403,14 @@ extern "C" void GameLoop(GameInfo *Game, WindowInfo *Screen, OpenGLInfo *OpenGL,
 	Vertex.verticesSize = sizeof(vertices);
 
 	char *Paths[2] = { { "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/test.bmp" },{ "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/facciaDiUaua.bmp" } };	
-	char *Path = { "F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/container.bmp" };
+	char *Path[2] = { {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/container.bmp" }, {"F:/ProgrammingProjects/Lowy/miniature-barnacle/resources/container_specular.bmp"} };
 
 	/* My naming scheme is completely wrong. 
 	 * The reason why there's a light_container is because the light is not rendered, just used as a calculation. 
 	 * The container is what is rendered as the object producing the light */
-	SetupVAO(Game, OpenGL, VAO_RECTANGLE, Vertex, &Path, 1, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/RectangleFrag.frag");
-	SetupVAO(Game, OpenGL, VAO_LIGHT_CONTAINER, Vertex, &Path, 1, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerFrag.frag");
-	SetupVAO(Game, OpenGL, VAO_LIGHT, Vertex, Paths, 2, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightFrag.frag");
+	SetupVAO(Game, OpenGL, VAO_CUBE, Vertex, Path, 2, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/CubeVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/CubeFrag.frag");
+	SetupVAO(Game, OpenGL, VAO_LIGHT_CONTAINER, Vertex, Path, 2, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightContainerFrag.frag");
+	SetupVAO(Game, OpenGL, VAO_LIGHT, Vertex, NULL, 0, "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightVert.vs", "F:/ProgrammingProjects/Lowy/miniature-barnacle/code/Shaders/LightFrag.frag");
 
 	TransformManager *Transf = OpenGL->Transform;
 
@@ -412,13 +429,13 @@ extern "C" void GameLoop(GameInfo *Game, WindowInfo *Screen, OpenGLInfo *OpenGL,
 	*/
 	
 	SetView(Transf, *OpenGL->Camera);
-	SetModel(Transf, cube[2], scale, AngleX, AngleY);
+	SetModel(Transf, cube[2], scale, 0, 0);
 	SetTransform(Transf);
 	RenderToScreen(OpenGL, Vertex, VAO_LIGHT);
 
 	SetModel(Transf, cube[0], scale, AngleX, AngleY);
 	SetTransform(Transf);
-	RenderToScreen(OpenGL, Vertex, VAO_LIGHT_CONTAINER);
+	RenderToScreen(OpenGL, Vertex, VAO_CUBE);
 	
 	//SetModel(Transf, cube[1], scale, AngleX, AngleY);
 	//SetTransform(Transf);
